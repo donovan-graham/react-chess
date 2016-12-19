@@ -1,0 +1,6 @@
+FROM dongraham/node-dev:latest
+
+VOLUME /data
+WORKDIR /data
+
+EXPOSE 3000
