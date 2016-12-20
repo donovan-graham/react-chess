@@ -9,7 +9,7 @@ const rows = Array.of(1, 2, 3, 4, 5, 6, 7, 8);
 const getCellValue = (row, col) =>
   cols.indexOf(col) + row - 1;
 
-const getCellLabel = (row, col) => `${row}${col.toUpperCase()}`;
+const getCellLabel = (row, col) => `${col}${row}`;
 
 const getCellStyle = (cellValue) =>
   cellValue % 2 === 0 ? 'black' : 'white';
