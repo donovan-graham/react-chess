@@ -1,6 +1,5 @@
-import { COLOR_WHITE, COLOR_BLACK } from './constants';
+import { COLOR_WHITE, COLOR_BLACK, FEN_START } from './constants';
 import {
-  FEN_START,
   getActiveColorFromFEN,
   getFullMoveCountFromFEN,
   getEnPassantTargetSquareFromFEN,
@@ -102,17 +101,30 @@ describe('fen.getBoardStateFromFEN', () => {
       a7: 'p', b7: 'p', c7: 'p', d7: 'p', e7: 'p', f7: 'p', g7: 'p', h7: 'p',
       a2: 'P', b2: 'P', c2: 'P', d2: 'P', e2: 'P', f2: 'P', g2: 'P', h2: 'P',
       a1: 'R', b1: 'N', c1: 'B', d1: 'Q', e1: 'K', f1: 'B', g1: 'N', h1: 'R',
-    }
-    expect(JSON.stringify(getBoardStateFromFEN(FEN_START))).toEqual(JSON.stringify(board));
+    };
+    expect(JSON.stringify(getBoardStateFromFEN(FEN_START)))
+      .toEqual(JSON.stringify(board));
   });
 
-  // it(`returns 'undefined' at if en passant is not available`, () => {
-  //   const fen = 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2';
-  //   expect(getBoardStateFromFEN(fen)).toBeUndefined();
-  // });
-  //
-  // it(`returns algebraic target square if en passant target is avaialble`, () => {
-  //   const fen = 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq d4 1 2';
-  //   expect(getBoardStateFromFEN(fen)).toEqual('d4');
-  // });
+  it('board after 3 moves', () => {
+    const fen = 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2';
+    const board = {
+      a8: 'r', b8: 'n', c8: 'b', d8: 'q', e8: 'k', f8: 'b', g8: 'n', h8: 'r',
+      a7: 'p', b7: 'p',          d7: 'p', e7: 'p', f7: 'p', g7: 'p', h7: 'p',
+                        c5: 'p',
+                                          e4: 'P',
+                                                   f3: 'N',
+      a2: 'P', b2: 'P', c2: 'P', d2: 'P',          f2: 'P', g2: 'P', h2: 'P',
+      a1: 'R', b1: 'N', c1: 'B', d1: 'Q', e1: 'K', f1: 'B',          h1: 'R',
+    };
+    expect(JSON.stringify(getBoardStateFromFEN(fen)))
+      .toEqual(JSON.stringify(board));
+  });
+
+  it('an empty board', () => {
+    const fen = '8/8/8/8/8/8/8/8 b KQkq - 1 2';
+    const board = {};
+    expect(JSON.stringify(getBoardStateFromFEN(fen)))
+      .toEqual(JSON.stringify(board));
+  });
 });

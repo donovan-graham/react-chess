@@ -1,63 +1,61 @@
 import React, { PropTypes } from 'react';
 
+import { BOARD_FILES, BOARD_RANKS } from '../utils/constants';
+
 import './style.css';
 
-// rank and file
-const cols = Array.from('abcdefgh');
-const rows = Array.of(1, 2, 3, 4, 5, 6, 7, 8);
+// row == rank (1...8)
+// col == file (a...h)
 
-const getCellValue = (row, col) =>
-  cols.indexOf(col) + row - 1;
+const squareValue = (rank, file) =>
+  BOARD_FILES.indexOf(file) + rank - 1;
 
-const getCellLabel = (row, col) => `${col}${row}`;
+const squareLabel = (rank, file) => `${file}${rank}`;
 
-const getCellStyle = (cellValue) =>
-  cellValue % 2 === 0 ? 'black' : 'white';
+const squareStyle = (value) =>
+  value % 2 === 0 ? 'black' : 'white';
 
 
-const Cell = ({ row, col }) => {
-  const cellValue = getCellValue(row, col);
-  const cellStyle = getCellStyle(cellValue);
-  const cellLabel = getCellLabel(row, col);
+const Square = ({ rank, file }) => {
+  const value = squareValue(rank, file);
+  const style = squareStyle(value);
+  const label = squareLabel(rank, file);
   return (
-    <td className={cellStyle}>{cellLabel}</td>
+    <td className={style}>{label}</td>
   );
 };
 
-Cell.propTypes = {
-  row: PropTypes.number.isRequired,
-  col: PropTypes.string.isRequired,
+Square.propTypes = {
+  rank: PropTypes.number.isRequired,
+  file: PropTypes.string.isRequired,
 };
 
 
-const Row = ({ row }) => {
-  const cells = cols.map(c => <Cell key={c} row={row} col={c} />);
-  return <tr>{cells}</tr>;
+const Rank = ({ rank }) => {
+  const files = BOARD_FILES.map(file => <Square key={file} rank={rank} file={file} />);
+  return <tr>{files}</tr>;
 };
 
-Row.propTypes = {
-  row: PropTypes.number.isRequired,
+Rank.propTypes = {
+  rank: PropTypes.number.isRequired,
 };
-
 
 const ChessBoard = () => {
-  const board = rows.reverse().map(r => <Row key={r} row={r} />);
+  const ranks = BOARD_RANKS.reverse().map(rank => <Rank key={rank} rank={rank} />);
   return (
     <table className="chess-board">
       <tbody>
-        {board}
+        {ranks}
       </tbody>
     </table>
   );
 };
 
 export {
-  cols,
-  rows,
-  getCellStyle,
-  getCellValue,
-  getCellLabel,
-  Cell,
-  Row,
+  squareStyle,
+  squareValue,
+  squareLabel,
+  Square,
+  Rank,
 };
 export default ChessBoard;

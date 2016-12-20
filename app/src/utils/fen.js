@@ -1,36 +1,33 @@
-import { COLOR_WHITE, COLOR_BLACK } from './constants';
+import { COLOR_WHITE, COLOR_BLACK, BOARD_FILES, FEN_START } from './constants';
 
-// const pieceRegex = /[rnbqkbnrpRNBQKBNRP]/;
-const cols = Array.from('abcdefgh');
-
-export const FEN_START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-function replaceCounter(str, placeholder = '.', counter = 8) {
+function replaceEmptyCounterWithChar(str, char = '.', counter = 8) {
   if (counter < 1) {
     return str;
   } else {
-    const newStr = str.replace(counter, placeholder.repeat(counter))
-    return replaceCounter(newStr, placeholder, counter - 1);
+    const newStr = str.replace(counter, char.repeat(counter))
+    return replaceEmptyCounterWithChar(newStr, char, counter - 1);
   }
 }
 
 function getBoardStateFromFEN(fen) {
-  const placeholder = '.';
+  const emptyChar = '.';
   const simpleRows = fen.split(' ')[0].split('/');
-  const filledRows = simpleRows.map(str => replaceCounter(str).split(''));
 
-  const algebraicRows = filledRows.map((arr, r) =>
-    arr.reduce((acc, piece, c) => {
-      if (piece !== placeholder) {
-        const row = 8 - r;
-        const col = cols[c];
-        const square = `${col}${row}`
+  const filledRows = simpleRows.map(str =>
+    Array.from(replaceEmptyCounterWithChar(str, emptyChar)));
+
+  const mappedRows = filledRows.map((row, i) =>
+    row.reduce((acc, piece, j) => {
+      if (piece !== emptyChar) {
+        const rank = 8 - i;
+        const file = BOARD_FILES[j];
+        const square = `${file}${rank}`
         acc[square] = piece;
       }
       return acc;
     }, {}));
 
-  return Object.assign({}, ...algebraicRows);
+  return Object.assign({}, ...mappedRows);
 }
 
 function getEnPassantTargetSquareFromFEN(fen) {
