@@ -7,7 +7,7 @@ import {
 
 export const initalState = {
   pieces: getBoardStateFromFEN(FEN_START),
-  history: [FEN_START],
+  history: [FEN_START,],
   activeColor: getActiveColorFromFEN(FEN_START),
 }
 
