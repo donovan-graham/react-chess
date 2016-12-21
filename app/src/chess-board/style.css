@@ -9,6 +9,7 @@ table.chess-board td {
   height: 60px;
   width: 60px;
   min-width: 60px;
+  font-size: 32px;
   text-align: center;
   box-sizing: border-box;
   border: 1px solid transparent;

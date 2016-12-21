@@ -2,12 +2,11 @@ import { connect } from 'react-redux'
 
 import ChessBoard from './component';
 
-
-// const mapStateToProps = (state) => {
-//   return {
-//     todos: getVisibleTodos(state.todos, state.visibilityFilter)
-//   }
-// }
+const mapStateToProps = (state) => {
+  return {
+    pieces: state.pieces,
+  }
+}
 //
 // const mapDispatchToProps = (dispatch) => {
 //   return {
@@ -17,4 +16,4 @@ import ChessBoard from './component';
 //   }
 // }
 
-export default connect(/* mapStateToProps, mapDispatchToProps */)(ChessBoard);
+export default connect(mapStateToProps/* , mapDispatchToProps */)(ChessBoard);

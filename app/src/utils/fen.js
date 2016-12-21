@@ -1,4 +1,4 @@
-import { COLOR_WHITE, COLOR_BLACK, BOARD_FILES, FEN_START } from './constants';
+import { COLOR_WHITE, COLOR_BLACK, BOARD_FILES } from './constants';
 
 function replaceEmptyCounterWithChar(str, char = '.', counter = 8) {
   if (counter < 1) {
@@ -36,7 +36,7 @@ function getEnPassantTargetSquareFromFEN(fen) {
 }
 
 function getFullMoveCountFromFEN(fen) {
- return parseInt(fen.split(' ')[5]);
+ return parseInt(fen.split(' ')[5], 10);
 }
 
 function getActiveColorFromFEN(fen) {
