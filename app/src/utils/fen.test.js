@@ -34,6 +34,9 @@ A FEN record contains six fields. The separator between fields is a space. The f
   6. Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
 */
 
+// const testFen1  = '4kb1r/p4ppp/4q3/8/8/1B6/PPP2PPP/2KR4 w KQkq - 0 1';
+// const testFen2  = 'r1bq1rk1/pp3ppp/3n4/2p1N3/2B5/7P/PPP2PP1/R1BQR1K1 w KQkq - 0 1';
+
 describe('fen.getActiveColorFromFEN', () => {
   it('at start the active color is white', () => {
     expect(getActiveColorFromFEN(FEN_START)).toEqual(COLOR_WHITE);
