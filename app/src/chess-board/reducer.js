@@ -17,7 +17,7 @@ function reducer(state = initalState, action) {
     case NEXT_FEN_BOARD:
       return {
         pieces: getBoardStateFromFEN(action.fen),
-        history: state.history, // .push(action.fen)
+        history: [...state.history, action.fen],
         activeColor: getActiveColorFromFEN(action.fen),
       }
     default:
