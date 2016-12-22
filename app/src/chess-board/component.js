@@ -52,7 +52,7 @@ Rank.propTypes = {
 
 const ChessBoard = ({ pieces, history }) => {
   const ranks = [...BOARD_RANKS].reverse().map(rank => <Rank key={rank} rank={rank} pieces={pieces} />);
-  const moves = history.map(move => <li>{move}</li>);
+  const moves = history.map((move, i) => <li key={i}>{move}</li>);
 
   return (
     <div>
@@ -66,7 +66,7 @@ const ChessBoard = ({ pieces, history }) => {
   );
 };
 
-Rank.propTypes = {
+ChessBoard.propTypes = {
   pieces: PropTypes.object.isRequired,
   history: PropTypes.array.isRequired,
 };
