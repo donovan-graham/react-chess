@@ -1,4 +1,8 @@
-import { COLOR_WHITE, COLOR_BLACK, BOARD_FILES } from './constants';
+import {
+  COLOR_WHITE,
+  COLOR_BLACK,
+  BOARD_FILES,
+} from './constants';
 
 function replaceEmptyCounterWithChar(str, char = '.', counter = 8) {
   if (counter < 1) {
@@ -11,23 +15,24 @@ function replaceEmptyCounterWithChar(str, char = '.', counter = 8) {
 
 function getBoardStateFromFEN(fen) {
   const emptyChar = '.';
-  const simpleRows = fen.split(' ')[0].split('/');
+  const simpleRanks = fen.split(' ')[0].split('/');
 
-  const filledRows = simpleRows.map(str =>
-    Array.from(replaceEmptyCounterWithChar(str, emptyChar)));
+  const filledRanks = simpleRanks.map(rankString =>
+    Array.from(replaceEmptyCounterWithChar(rankString, emptyChar)));
 
-  const mappedRows = filledRows.map((row, i) =>
-    row.reduce((acc, piece, j) => {
-      if (piece !== emptyChar) {
-        const rank = 8 - i;
-        const file = BOARD_FILES[j];
-        const square = `${file}${rank}`
-        acc[square] = piece;
+  const mappedRanks = filledRanks.map((rankString, i) =>
+    rankString.reduce((acc, char, j) => {
+      if (char === emptyChar) {
+        return acc;
       }
+
+      const rank = 8 - i;
+      const file = BOARD_FILES[j];
+      const square = `${file}${rank}`
+      acc[square] = char;
       return acc;
     }, {}));
-
-  return Object.assign({}, ...mappedRows);
+  return Object.assign({}, ...mappedRanks);
 }
 
 function getEnPassantTargetSquareFromFEN(fen) {
