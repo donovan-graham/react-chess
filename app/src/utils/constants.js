@@ -1,5 +1,5 @@
-export const COLOR_WHITE = 'color/white';
-export const COLOR_BLACK = 'color/black';
+export const COLOR_WHITE = 'white';
+export const COLOR_BLACK = 'black';
 
 export const BOARD_FILES = Array.from('abcdefgh');
 export const BOARD_RANKS = Array.of(1, 2, 3, 4, 5, 6, 7, 8);
@@ -18,6 +18,25 @@ export const PIECE_WHITE_ROOK = 'R';
 export const PIECE_BLACK_ROOK = 'r';
 export const PIECE_WHITE_PAWN = 'P';
 export const PIECE_BLACK_PAWN = 'p';
+
+export const COLOR_TO_PIECES_MAP = {
+  [COLOR_WHITE]: [
+    PIECE_WHITE_KING,
+    PIECE_WHITE_QUEEN,
+    PIECE_WHITE_BISHOP,
+    PIECE_WHITE_KNIGHT,
+    PIECE_WHITE_ROOK,
+    PIECE_WHITE_PAWN,
+  ],
+  [COLOR_BLACK]: [
+    PIECE_BLACK_KING,
+    PIECE_BLACK_QUEEN,
+    PIECE_BLACK_BISHOP,
+    PIECE_BLACK_KNIGHT,
+    PIECE_BLACK_ROOK,
+    PIECE_BLACK_PAWN,
+  ],
+};
 
 export const All_PIECES = [
   PIECE_WHITE_KING,

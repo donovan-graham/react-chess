@@ -5,6 +5,7 @@ import Component from './component';
 const mapStateToProps = (state) => {
   return {
     pieces: state.chessBoard.pieces,
+    activeColor: state.chessBoard.activeColor,
   }
 }
 

@@ -22,3 +22,19 @@ table.chess-board td.black {
 table.chess-board td.white {
   background-color: #FFFFFF;
 }
+
+
+table.chess-board td.can-select {
+  border-style: inset;
+  border-color: blue;
+}
+
+table.chess-board td.is-active {
+  border-style: inset;
+  border-color: orange;
+}
+
+table.chess-board td.is-move {
+  border-style: inset;
+  border-color: green;
+}
