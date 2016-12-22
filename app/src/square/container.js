@@ -7,7 +7,7 @@ const mapStateToProps = (state) => {
     pieces: state.chessBoard.pieces,
   }
 }
-//
+
 // const mapDispatchToProps = (dispatch) => {
 //   return {
 //     onTodoClick: (id) => {
