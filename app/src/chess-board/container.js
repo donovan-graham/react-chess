@@ -5,6 +5,7 @@ import ChessBoard from './component';
 const mapStateToProps = (state) => {
   return {
     pieces: state.chessBoard.pieces,
+    history: state.chessBoard.history,
   }
 }
 //

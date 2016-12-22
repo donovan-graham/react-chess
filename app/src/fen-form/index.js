@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import { Field, reduxForm } from 'redux-form';
+import { nextFenBoard } from '../chess-board/actions';
 
 const fenForm = ({ handleSubmit }) => (
   <form onSubmit={handleSubmit}>
@@ -23,7 +24,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onSubmit: (values) => {
-      console.log(values);
+      dispatch(nextFenBoard(values.new_board));
     },
   };
 };
