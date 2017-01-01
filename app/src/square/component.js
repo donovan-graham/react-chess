@@ -1,25 +1,24 @@
 import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
-
 import {
-  BOARD_FILES,
   PIECE_TO_SYMBOL_MAP,
   COLOR_TO_PIECES_MAP,
 } from '../utils/constants';
+import {
+  squareInt,
+  squareKey,
+  squareColor,
+} from './utils';
+
 
 // row == rank (1...8)
 // col == file (a...h)
+const noOp = () => {
+  console.log("noOp");
+};
 
-const squareInt = (rank, file) =>
-  BOARD_FILES.indexOf(file) + rank - 1;
-
-const squareKey = (rank, file) => `${file}${rank}`;
-
-const squareColor = (int) =>
-  int % 2 === 0 ? 'black' : 'white';
-
-const Square = ({ rank, file, pieces, activeColor }) => {
+const Square = ({ rank, file, pieces, activeColor, activeSquare, availableMoves, onSelectSquare, onMoveToSquare }) => {
   const color = squareColor(squareInt(rank, file));
   const square = squareKey(rank, file);
 
@@ -29,11 +28,10 @@ const Square = ({ rank, file, pieces, activeColor }) => {
 
   const canSelect = hasPiece && COLOR_TO_PIECES_MAP[activeColor].indexOf(piece) !== -1;
 
-  const activeSquare = 'e2';
-  const availableMoves = ['e3', 'e4'];
-
   const isActive = square === activeSquare;
   const isMove = availableMoves.indexOf(square) !== -1;
+
+  const onClick = (canSelect) ? onSelectSquare : (isMove) ? onMoveToSquare : noOp;
 
   const styles = classNames(color, {
     'is-active': isActive,
@@ -43,7 +41,7 @@ const Square = ({ rank, file, pieces, activeColor }) => {
 
 
   return (
-    <td className={styles} onClick={()=> isMove && console.log(square)}>{symbol}</td>
+    <td data-square={square} className={styles} onClick={() => onClick(square)}>{symbol}</td>
   );
 };
 
@@ -53,6 +51,11 @@ Square.propTypes = {
 
   pieces: PropTypes.object.isRequired,
   activeColor: PropTypes.string.isRequired,
+  activeSquare: PropTypes.string.isRequired,
+  availableMoves: PropTypes.array.isRequired,
+
+  onSelectSquare: PropTypes.func.isRequired,
+  onMoveToSquare: PropTypes.func.isRequired,
 };
 
 export {
