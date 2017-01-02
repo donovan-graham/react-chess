@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
 import {
-  PIECE_TO_SYMBOL_MAP,
+  PIECE_TO_CSS_CLASS_NAME_MAP,
   COLOR_TO_PIECES_MAP,
 } from '../utils/constants';
 import {
@@ -24,7 +24,7 @@ const Square = ({ rank, file, pieces, activeColor, activeSquare, availableMoves,
 
   const piece = pieces[square];
   const hasPiece = !!piece;
-  const symbol = (hasPiece && PIECE_TO_SYMBOL_MAP[piece]) || '';
+  const fullName = (hasPiece && PIECE_TO_CSS_CLASS_NAME_MAP[piece]) || '';
 
   const canSelect = hasPiece && COLOR_TO_PIECES_MAP[activeColor].indexOf(piece) !== -1;
 
@@ -39,9 +39,10 @@ const Square = ({ rank, file, pieces, activeColor, activeSquare, availableMoves,
     'can-select': canSelect,
   });
 
-
   return (
-    <td data-square={square} className={styles} onClick={() => onClick(square)}>{symbol}</td>
+    <td data-square={square} className={styles} onClick={() => onClick(square)}>
+      <div className={fullName}></div>
+    </td>
   );
 };
 

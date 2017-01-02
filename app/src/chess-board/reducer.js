@@ -36,8 +36,6 @@ function reducer(state = initalState, action) {
         // availableMoves: generateAvaiableMovesFromSquare(action.square),
       };
 
-      return state;
-
     case MOVE_TO_SQUARE:
       // swap piece position
       // generate fen for history

@@ -14,16 +14,16 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch, { rank, file }) => {
-  const square = squareKey(rank, file);
+  const startingSquare = squareKey(rank, file);
 
   return {
-    onSelectSquare: (square) => {
-      console.log("selectSquare:", square);
-      dispatch(selectSquare(square));
+    onSelectSquare: () => {
+      console.log("selectSquare:", startingSquare);
+      dispatch(selectSquare(startingSquare));
     },
-    onMoveToSquare: (square) => {
-      console.log("moveToSquare:", square);
-      dispatch(moveToSquare(square));
+    onMoveToSquare: (endingSquare) => {
+      console.log("moveToSquare:", startingSquare, endingSquare);
+      dispatch(moveToSquare(startingSquare, endingSquare));
     },
   };
 };

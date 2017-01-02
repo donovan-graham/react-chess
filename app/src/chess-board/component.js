@@ -11,7 +11,7 @@ import './style.css';
 
 const Rank = ({ rank }) => {
   const files = BOARD_FILES.map(file => <Square key={file} rank={rank} file={file} />);
-  return <tr>{files}</tr>;
+  return <tr data-rank={rank}>{files}</tr>;
 };
 
 Rank.propTypes = {
