@@ -6,9 +6,9 @@ import {
   COLOR_TO_PIECES_MAP,
 } from '../utils/constants';
 import {
-  squareInt,
   squareKey,
   squareColor,
+  squareColorInteger,
 } from './utils';
 
 
@@ -19,7 +19,8 @@ const noOp = () => {
 };
 
 const Square = ({ rank, file, pieces, activeColor, activeSquare, availableMoves, onSelectSquare, onMoveToSquare }) => {
-  const color = squareColor(squareInt(rank, file));
+  const colorInteger = squareColorInteger(rank, file);
+  const color = squareColor(colorInteger);
   const square = squareKey(rank, file);
 
   const piece = pieces[square];
@@ -52,17 +53,11 @@ Square.propTypes = {
 
   pieces: PropTypes.object.isRequired,
   activeColor: PropTypes.string.isRequired,
-  activeSquare: PropTypes.string.isRequired,
+  activeSquare: PropTypes.string,
   availableMoves: PropTypes.array.isRequired,
 
   onSelectSquare: PropTypes.func.isRequired,
   onMoveToSquare: PropTypes.func.isRequired,
-};
-
-export {
-  squareColor,
-  squareInt,
-  squareKey,
 };
 
 export default Square;
