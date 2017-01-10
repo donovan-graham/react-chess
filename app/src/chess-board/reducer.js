@@ -2,14 +2,30 @@ import { FEN_START } from '../utils/constants';
 import { NEXT_FEN_BOARD } from './actions';
 
 import {
+  COLOR_WHITE,
+  COLOR_BLACK,
+} from '../utils/constants';
+
+import {
   getBoardStateFromFEN,
   getActiveColorFromFEN,
 } from '../utils/fen';
 
 import {
+  PIECE_TO_MOVES_MAP,
+} from '../utils/moves';
+
+import {
   SELECT_SQUARE,
   MOVE_TO_SQUARE,
 } from '../square/actions';
+
+
+function generateAvaiableMovesFromSquare(pieces, square) {
+  const piece = pieces[square];
+  return PIECE_TO_MOVES_MAP[piece](pieces, square);
+}
+
 
 export const initalState = {
   pieces: getBoardStateFromFEN(FEN_START),
@@ -30,19 +46,34 @@ function reducer(state = initalState, action) {
       };
 
     case SELECT_SQUARE:
+      const activeSquare = action.square;
+      const availableMoves = generateAvaiableMovesFromSquare(state.pieces, activeSquare);
       return {
         ...state,
-        activeSquare: action.square,
-        // availableMoves: generateAvaiableMovesFromSquare(action.square),
+        activeSquare,
+        availableMoves,
       };
 
     case MOVE_TO_SQUARE:
-      // swap piece position
+      // DONE - swap piece position
+      // DONE - get active color
+      // DONE - reset activeSquare, and availableMoves
       // generate fen for history
-      // get active color
-      // reset activeSquare, and availableMoves
 
-      return state;
+      const nextPieces = { ...state.pieces };
+      const piece = state.pieces[state.activeSquare];
+      delete nextPieces[state.activeSquare];
+      nextPieces[action.square] = piece;
+
+      const nextColor = (state.activeColor === COLOR_WHITE) ? COLOR_BLACK : COLOR_WHITE;
+
+      return {
+        ...state,
+        pieces: nextPieces,
+        activeColor: nextColor,
+        activeSquare: null,
+        availableMoves: [],
+      };
 
     default:
       return state;

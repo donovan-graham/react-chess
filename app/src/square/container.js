@@ -9,7 +9,7 @@ const mapStateToProps = (state) => {
     pieces: state.chessBoard.pieces,
     activeColor: state.chessBoard.activeColor,
     activeSquare: state.chessBoard.activeSquare,
-    availableMoves: ['d3', 'd4'],
+    availableMoves: state.chessBoard.availableMoves,
   };
 };
 
@@ -23,7 +23,7 @@ const mapDispatchToProps = (dispatch, { rank, file }) => {
     },
     onMoveToSquare: (endingSquare) => {
       console.log("moveToSquare:", startingSquare, endingSquare);
-      dispatch(moveToSquare(startingSquare, endingSquare));
+      dispatch(moveToSquare(endingSquare));
     },
   };
 };

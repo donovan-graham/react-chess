@@ -3,6 +3,14 @@ import {
 } from '../utils/constants';
 
 
+export const squareCoOrdinates = (square) => {
+  const [file, rank] = square.split('');
+  return {
+    file,
+    rank: parseInt(rank, 10),
+  };
+};
+
 export const squareKey = (rank, file) => `${file}${rank}`;
 
 export const squareColorInteger = (rank, file) =>
