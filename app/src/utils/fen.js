@@ -1,7 +1,6 @@
 import {
   COLOR_WHITE,
   COLOR_BLACK,
-  BOARD_FILES,
 } from './constants';
 
 function replaceEmptyCounterWithChar(str, char = '.', counter = 8) {
@@ -20,19 +19,14 @@ function getBoardStateFromFEN(fen) {
   const filledRanks = simpleRanks.map(rankString =>
     Array.from(replaceEmptyCounterWithChar(rankString, emptyChar)));
 
-  const mappedRanks = filledRanks.map((rankString, i) =>
-    rankString.reduce((acc, char, j) => {
-      if (char === emptyChar) {
-        return acc;
-      }
-
-      const rank = 8 - i;
-      const file = BOARD_FILES[j];
-      const square = `${file}${rank}`
-      acc[square] = char;
+  const board = filledRanks.map((rankString, y) =>
+    rankString.reduce((acc, char, x) => {
+      const square = (x * 10) + (7 - y);
+      acc[square] = (char === emptyChar) ? null : char;
       return acc;
     }, {}));
-  return Object.assign({}, ...mappedRanks);
+
+  return Object.assign({}, ...board);
 }
 
 function getEnPassantTargetSquareFromFEN(fen) {

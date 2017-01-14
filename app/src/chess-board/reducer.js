@@ -21,9 +21,9 @@ import {
 } from '../square/actions';
 
 
-function generateAvaiableMovesFromSquare(pieces, square) {
-  const piece = pieces[square];
-  return PIECE_TO_MOVES_MAP[piece](pieces, square);
+function getMoves(pos, board) {
+  const piece = board[pos];
+  return PIECE_TO_MOVES_MAP[piece](pos, board);
 }
 
 
@@ -47,7 +47,7 @@ function reducer(state = initalState, action) {
 
     case SELECT_SQUARE:
       const activeSquare = action.square;
-      const availableMoves = generateAvaiableMovesFromSquare(state.pieces, activeSquare);
+      const availableMoves = getMoves(activeSquare, state.pieces);
       return {
         ...state,
         activeSquare,

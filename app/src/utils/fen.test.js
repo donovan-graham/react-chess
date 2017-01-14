@@ -98,12 +98,18 @@ describe('fen.getEnPassantTargetSquareFromFEN', () => {
 });
 
 describe('fen.getBoardStateFromFEN', () => {
+  const nil = null;
+
   it('board at start', () => {
     const board = {
-      a8: 'r', b8: 'n', c8: 'b', d8: 'q', e8: 'k', f8: 'b', g8: 'n', h8: 'r',
-      a7: 'p', b7: 'p', c7: 'p', d7: 'p', e7: 'p', f7: 'p', g7: 'p', h7: 'p',
-      a2: 'P', b2: 'P', c2: 'P', d2: 'P', e2: 'P', f2: 'P', g2: 'P', h2: 'P',
-      a1: 'R', b1: 'N', c1: 'B', d1: 'Q', e1: 'K', f1: 'B', g1: 'N', h1: 'R',
+      7: 'r', 17: 'n', 27: 'b', 37: 'q', 47: 'k', 57: 'b', 67: 'n', 77: 'r',
+      6: 'p', 16: 'p', 26: 'p', 36: 'p', 46: 'p', 56: 'p', 66: 'p', 76: 'p',
+      5: nil, 15: nil, 25: nil, 35: nil, 45: nil, 55: nil, 65: nil, 75: nil,
+      4: nil, 14: nil, 24: nil, 34: nil, 44: nil, 54: nil, 64: nil, 74: nil,
+      3: nil, 13: nil, 23: nil, 33: nil, 43: nil, 53: nil, 63: nil, 73: nil,
+      2: nil, 12: nil, 22: nil, 32: nil, 42: nil, 52: nil, 62: nil, 72: nil,
+      1: 'P', 11: 'P', 21: 'P', 31: 'P', 41: 'P', 51: 'P', 61: 'P', 71: 'P',
+      0: 'R', 10: 'N', 20: 'B', 30: 'Q', 40: 'K', 50: 'B', 60: 'N', 70: 'R',
     };
     expect(JSON.stringify(getBoardStateFromFEN(FEN_START)))
       .toEqual(JSON.stringify(board));
@@ -112,21 +118,32 @@ describe('fen.getBoardStateFromFEN', () => {
   it('board after 3 moves', () => {
     const fen = 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2';
     const board = {
-      a8: 'r', b8: 'n', c8: 'b', d8: 'q', e8: 'k', f8: 'b', g8: 'n', h8: 'r',
-      a7: 'p', b7: 'p',          d7: 'p', e7: 'p', f7: 'p', g7: 'p', h7: 'p',
-                        c5: 'p',
-                                          e4: 'P',
-                                                   f3: 'N',
-      a2: 'P', b2: 'P', c2: 'P', d2: 'P',          f2: 'P', g2: 'P', h2: 'P',
-      a1: 'R', b1: 'N', c1: 'B', d1: 'Q', e1: 'K', f1: 'B',          h1: 'R',
+      7: 'r', 17: 'n', 27: 'b', 37: 'q', 47: 'k', 57: 'b', 67: 'n', 77: 'r',
+      6: 'p', 16: 'p', 26: nil, 36: 'p', 46: 'p', 56: 'p', 66: 'p', 76: 'p',
+      5: nil, 15: nil, 25: nil, 35: nil, 45: nil, 55: nil, 65: nil, 75: nil,
+      4: nil, 14: nil, 24: 'p', 34: nil, 44: nil, 54: nil, 64: nil, 74: nil,
+      3: nil, 13: nil, 23: nil, 33: nil, 43: 'P', 53: nil, 63: nil, 73: nil,
+      2: nil, 12: nil, 22: nil, 32: nil, 42: nil, 52: 'N', 62: nil, 72: nil,
+      1: 'P', 11: 'P', 21: 'P', 31: 'P', 41: nil, 51: 'P', 61: 'P', 71: 'P',
+      0: 'R', 10: 'N', 20: 'B', 30: 'Q', 40: 'K', 50: 'B', 60: nil, 70: 'R',
     };
+
     expect(JSON.stringify(getBoardStateFromFEN(fen)))
       .toEqual(JSON.stringify(board));
   });
 
   it('an empty board', () => {
     const fen = '8/8/8/8/8/8/8/8 b KQkq - 1 2';
-    const board = {};
+    const board = {
+      7: nil, 17: nil, 27: nil, 37: nil, 47: nil, 57: nil, 67: nil, 77: nil,
+      6: nil, 16: nil, 26: nil, 36: nil, 46: nil, 56: nil, 66: nil, 76: nil,
+      5: nil, 15: nil, 25: nil, 35: nil, 45: nil, 55: nil, 65: nil, 75: nil,
+      4: nil, 14: nil, 24: nil, 34: nil, 44: nil, 54: nil, 64: nil, 74: nil,
+      3: nil, 13: nil, 23: nil, 33: nil, 43: nil, 53: nil, 63: nil, 73: nil,
+      2: nil, 12: nil, 22: nil, 32: nil, 42: nil, 52: nil, 62: nil, 72: nil,
+      1: nil, 11: nil, 21: nil, 31: nil, 41: nil, 51: nil, 61: nil, 71: nil,
+      0: nil, 10: nil, 20: nil, 30: nil, 40: nil, 50: nil, 60: nil, 70: nil,
+    };
     expect(JSON.stringify(getBoardStateFromFEN(fen)))
       .toEqual(JSON.stringify(board));
   });

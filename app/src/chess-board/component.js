@@ -1,35 +1,32 @@
 import React, { PropTypes } from 'react';
 
 import Square from '../square';
-
-import {
-  BOARD_FILES,
-  BOARD_RANKS,
-} from '../utils/constants';
-
 import './style.css';
 
-const Rank = ({ rank }) => {
-  const files = BOARD_FILES.map(file => <Square key={file} rank={rank} file={file} />);
-  return <tr data-rank={rank}>{files}</tr>;
+const xs = [0,10,20,30,40,50,60,70];
+const ys = [0,1,2,3,4,5,6,7].reverse();
+
+const Row = ({ y }) => {
+  const cols = xs.map(x => <Square key={x + y} pos={x + y} />);
+  return <tr data-row={y}>{cols}</tr>;
 };
 
-Rank.propTypes = {
-  rank: PropTypes.number.isRequired,
+Row.propTypes = {
+  y: PropTypes.number.isRequired,
 };
 
 const ChessBoard = () => {
-  const ranks = [...BOARD_RANKS].reverse().map(rank => <Rank key={rank} rank={rank} />);
+  const rows = ys.map(y => <Row key={y} y={y} />);
   return (
     <div>
       <table className="chess-board">
         <tbody>
-          {ranks}
+          {rows}
         </tbody>
       </table>
     </div>
   );
 };
 
-export { Rank };
+export { Row };
 export default ChessBoard;

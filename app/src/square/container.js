@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 
 import { selectSquare, moveToSquare } from './actions';
 import Component from './component';
-import { squareKey } from './utils';
+// import { squareKey } from './utils';
 
 const mapStateToProps = (state) => {
   return {
@@ -13,17 +13,15 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, { rank, file }) => {
-  const startingSquare = squareKey(rank, file);
-
+const mapDispatchToProps = (dispatch, { pos }) => {
   return {
     onSelectSquare: () => {
-      console.log("selectSquare:", startingSquare);
-      dispatch(selectSquare(startingSquare));
+      console.log("selectSquare:", pos);
+      dispatch(selectSquare(pos));
     },
-    onMoveToSquare: (endingSquare) => {
-      console.log("moveToSquare:", startingSquare, endingSquare);
-      dispatch(moveToSquare(endingSquare));
+    onMoveToSquare: (endPos) => {
+      console.log("moveToSquare:", pos, endPos);
+      dispatch(moveToSquare(endPos));
     },
   };
 };
