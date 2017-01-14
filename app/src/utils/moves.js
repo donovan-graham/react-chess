@@ -43,16 +43,37 @@ export function isValidPos(pos) {
   return (0 <= x && x <=7 && 0 <= y && y <= 7);
 }
 
-export function isOccupiedPos(board, pos) {
-  return !!board[pos];
+export function isOpponentsPiece(piece, color) {
+  const opponentColor = getOpponentsColor(color);
+  return COLOR_TO_PIECES_MAP[opponentColor].indexOf(piece) !== -1;
 }
 
-export function isCapturePos(board, pos, color) {
+
+export function getOccupiedState(board, pos, color) {
   const piece = getPieceAtPos(board, pos);
-  if (!piece) return false;
-  const opponent = getOpponentsColor(color);
-  return COLOR_TO_PIECES_MAP[opponent].indexOf(piece) !== -1;
+  if (!!piece) {
+    return {
+      isOccupied: true,
+      isOpponent: isOpponentsPiece(piece, color),
+    };
+  }
+
+  return {
+    isOccupied: false,
+    isOpponent: false,
+  };
 }
+
+// export function isOccupiedPos(board, pos) {
+//   return !!board[pos];
+// }
+//
+// export function isCapturePos(board, pos, color) {
+//   const piece = getPieceAtPos(board, pos);
+//   if (!piece) return false;
+//   const opponent = getOpponentsColor(color);
+//   return COLOR_TO_PIECES_MAP[opponent].indexOf(piece) !== -1;
+// }
 
 
 // const diagonalLeft = -9;
@@ -89,7 +110,9 @@ export function pawnMoves({ pos, board, color, enPessantPos}) {
     for (i = 0; i < repeat; i++) {
       move += offset;
       if (!isValidPos(move)) break;
-      if (isOccupiedPos(board, move)) break;
+
+      const { isOccupied } = getOccupiedState(board, move, color);
+      if (isOccupied) break;
 
       const moveAction = (y === yPromotion) ? movePawnPromotion : moveStandard;
       moves[move] = moveAction(pos, move);
@@ -100,11 +123,16 @@ export function pawnMoves({ pos, board, color, enPessantPos}) {
     const move = pos + capture;
     if (!isValidPos(move)) return;
 
-    if (move === enPessantPos) {
+    const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+    if (!isOccupied && move === enPessantPos) {
       moves[move] = movePawnEnPassant(pos, move);
-    } else if (isCapturePos(board, move, color)) {
+      return;
+    }
+
+    if (isOccupied && isOpponent) {
       const moveAction = (y === yPromotion) ? movePawnPromotion : moveStandard;
       moves[move] = moveAction(pos, move);
+      return;
     }
   });
 
@@ -120,9 +148,8 @@ export function kingMoves({ pos, board, color }) {
     const move = pos + offset;
     if (!isValidPos(move)) return;
 
-    if (!isOccupiedPos(board, move)) {
-      moves[move] = moveStandard(pos, move);
-    } else if (isCapturePos(board, move, color)) {
+    const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+    if (!isOccupied || isOpponent) {
       moves[move] = moveStandard(pos, move);
     }
   });
@@ -152,14 +179,11 @@ export function queenMoves({ pos, board, color }) {
       move += offset;
       if (!isValidPos(move)) break;
 
-      if (isOccupiedPos(board, move)) {
-        if (isCapturePos(board, move, color)) {
-          moves[move] = moveStandard(pos, move);
-        }
-        break;
-      };
-
-      moves[move] = moveStandard(pos, move);
+      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+      if (!isOccupied || isOpponent) {
+        moves[move] = moveStandard(pos, move);
+      }
+      if (isOccupied) break;
     }
   });
 
@@ -180,14 +204,11 @@ export function rookMoves({ pos, board, color }) {
       move += offset;
       if (!isValidPos(move)) break;
 
-      if (isOccupiedPos(board, move)) {
-        if (isCapturePos(board, move, color)) {
-          moves[move] = moveStandard(pos, move);
-        }
-        break;
-      };
-
-      moves[move] = moveStandard(pos, move);
+      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+      if (!isOccupied || isOpponent) {
+        moves[move] = moveStandard(pos, move);
+      }
+      if (isOccupied) break;
     }
   });
 
@@ -209,14 +230,11 @@ export function bishopMoves({ pos, board, color }) {
       move += offset;
       if (!isValidPos(move)) break;
 
-      if (isOccupiedPos(board, move)) {
-        if (isCapturePos(board, move, color)) {
-          moves[move] = moveStandard(pos, move);
-        }
-        break;
-      };
-
-      moves[move] = moveStandard(pos, move);
+      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+      if (!isOccupied || isOpponent) {
+        moves[move] = moveStandard(pos, move);
+      }
+      if (isOccupied) break;
     }
   });
 
@@ -232,9 +250,8 @@ export function knightMoves({ pos, board, color }) {
     const move = pos + offset;
     if (!isValidPos(move)) return;
 
-    if (!isOccupiedPos(board, move)) {
-      moves[move] = moveStandard(pos, move);
-    } else if (isCapturePos(board, move, color)) {
+    const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+    if (!isOccupied || isOpponent) {
       moves[move] = moveStandard(pos, move);
     }
   });
