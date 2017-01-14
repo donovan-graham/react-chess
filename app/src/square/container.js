@@ -1,8 +1,7 @@
 import { connect } from 'react-redux'
 
-import { selectSquare, moveToSquare } from './actions';
+import { selectSquare } from './actions'
 import Component from './component';
-// import { squareKey } from './utils';
 
 const mapStateToProps = (state) => {
   return {
@@ -15,13 +14,14 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, { pos }) => {
   return {
-    onSelectSquare: () => {
-      console.log("selectSquare:", pos);
-      dispatch(selectSquare(pos));
+    onSelect: () => {
+      const action = selectSquare(pos);
+      console.log("dispatch:", action);
+      dispatch(action);
     },
-    onMoveToSquare: (endPos) => {
-      console.log("moveToSquare:", pos, endPos);
-      dispatch(moveToSquare(endPos));
+    onMove: (moveAction) => {
+      console.log("dispatch:", moveAction);
+      dispatch(moveAction);
     },
   };
 };

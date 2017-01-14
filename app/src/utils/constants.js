@@ -4,6 +4,7 @@ export const COLOR_BLACK = 'black';
 export const BOARD_FILES = Array.from('abcdefgh');
 export const BOARD_RANKS = Array.of(1, 2, 3, 4, 5, 6, 7, 8);
 
+
 export const FEN_START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 export const PIECE_WHITE_KING = 'K';

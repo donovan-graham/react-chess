@@ -17,7 +17,16 @@ import {
   PIECE_BLACK_PAWN,
 } from './constants';
 
+import {
+  moveStandard,
+  movePawnEnPassant,
+  movePawnPromotion,
+} from './actions';
 
+
+function getOpponentsColor(color) {
+  return (color === COLOR_WHITE) ? COLOR_BLACK : COLOR_WHITE;
+}
 
 function getCoordinatesFromPos(pos) {
   const x = Math.floor(pos / 10);
@@ -25,28 +34,46 @@ function getCoordinatesFromPos(pos) {
   return { x, y };
 }
 
+function getPieceAtPos(board, pos) {
+  return board[pos];
+}
+
 function isValidPos(pos) {
   const { x, y } = getCoordinatesFromPos(pos);
   return (0 <= x && x <=7 && 0 <= y && y <= 7);
 }
 
-function pawnMoves(pos, board, color) {
+function isOccupiedPos(board, pos) {
+  return !!board[pos];
+}
+
+function isCapturePos(board, pos, color) {
+  const piece = getPieceAtPos(board, pos);
+  if (!piece) return false;
+  const opponent = getOpponentsColor(color);
+  return COLOR_TO_PIECES_MAP[opponent].indexOf(piece) !== -1;
+}
+
+// enPessantPos = 45 for testing
+function pawnMoves({ pos, board, color, enPessantPos}) {
   let offsets;
   let captures;
   let repeat;
-  const moves = [];
+  let yPromotion;
+  const moves = {};
 
-  const opponentColor = (color === COLOR_WHITE) ? COLOR_BLACK : COLOR_WHITE;
   const { y } = getCoordinatesFromPos(pos);
 
   if (color === COLOR_WHITE) {
     repeat = (y === 1) ? 2 : 1;
     offsets = [1];
     captures = [-9, 11];
+    yPromotion = 6;
   } else {
     repeat = (y === 6) ? 2 : 1;
     offsets = [-1];
     captures = [9, -11];
+    yPromotion = 1;
   }
 
   offsets.forEach(offset => {
@@ -56,8 +83,10 @@ function pawnMoves(pos, board, color) {
     for (i = 0; i < repeat; i++) {
       move += offset;
       if (!isValidPos(move)) break;
-      if (board[move]) break;
-      moves.push(move);
+      if (isOccupiedPos(board, move)) break;
+
+      const moveAction = (y === yPromotion) ? movePawnPromotion : moveStandard;
+      moves[move] = moveAction(pos, move);
     }
   });
 
@@ -65,11 +94,12 @@ function pawnMoves(pos, board, color) {
     const move = pos + capture;
     if (!isValidPos(move)) return;
 
-    const piece = board[move];
-    if (!piece) return;
-
-    if (COLOR_TO_PIECES_MAP[opponentColor].indexOf(piece) === -1) return;
-    moves.push(move);
+    if (move === enPessantPos) {
+      moves[move] = movePawnEnPassant(pos, move);
+    } else if (isCapturePos(board, move, color)) {
+      const moveAction = (y === yPromotion) ? movePawnPromotion : moveStandard;
+      moves[move] = moveAction(pos, move);
+    }
   });
 
   return moves;
@@ -77,40 +107,49 @@ function pawnMoves(pos, board, color) {
 
 export const PIECE_TO_MOVES_MAP = {
   [PIECE_WHITE_KING]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_WHITE_KING missing");
+    return {};
   },
   [PIECE_BLACK_KING]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_BLACK_KING missing");
+    return {};
   },
   [PIECE_WHITE_QUEEN]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_WHITE_QUEEN missing");
+    return {};
   },
   [PIECE_BLACK_QUEEN]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_BLACK_QUEEN missing");
+    return {};
   },
   [PIECE_WHITE_BISHOP]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_WHITE_BISHOP missing");
+    return {};
   },
   [PIECE_BLACK_BISHOP]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_BLACK_BISHOP missing");
+    return {};
   },
   [PIECE_WHITE_KNIGHT]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_WHITE_KNIGHT missing");
+    return {};
   },
   [PIECE_BLACK_KNIGHT]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_BLACK_KNIGHT missing");
+    return {};
   },
   [PIECE_WHITE_ROOK]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_WHITE_ROOK missing");
+    return {};
   },
   [PIECE_BLACK_ROOK]: (pos, board) => {
-    return [];
+    console.log("moves for PIECE_BLACK_ROOK missing");
+    return {};
   },
-
   [PIECE_WHITE_PAWN]: (pos, board) => {
-    return pawnMoves(pos, board, COLOR_WHITE);
+    return pawnMoves({ pos, board, color: COLOR_WHITE });
   },
   [PIECE_BLACK_PAWN]: (pos, board) => {
-    return pawnMoves(pos, board, COLOR_BLACK);
+    return pawnMoves({ pos, board, color: COLOR_BLACK });
   },
 };

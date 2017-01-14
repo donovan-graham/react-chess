@@ -10,13 +10,7 @@ import {
 } from './utils';
 
 
-// row == rank (1...8)
-// col == file (a...h)
-const noOp = () => {
-  console.log("noOp");
-};
-
-const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSelectSquare, onMoveToSquare }) => {
+const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSelect, onMove }) => {
   const color = squareColor(pos);
 
   const piece = pieces[pos];
@@ -26,9 +20,18 @@ const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSele
   const canSelect = hasPiece && COLOR_TO_PIECES_MAP[activeColor].indexOf(piece) !== -1;
 
   const isActive = pos === activeSquare;
-  const isMove = availableMoves.indexOf(pos) !== -1;
+  const moveAction = availableMoves[pos];
+  const isMove = !!moveAction;
 
-  const onClick = (canSelect) ? onSelectSquare : (isMove) ? onMoveToSquare : noOp;
+  const onClick = () => {
+    if (canSelect) {
+      return onSelect(pos);
+    }
+    if (isMove) {
+      return onMove(moveAction);
+    }
+    return;
+  };
 
   const styles = classNames(color, {
     'is-active': isActive,
@@ -37,7 +40,7 @@ const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSele
   });
 
   return (
-    <td data-square={pos} className={styles} onClick={() => onClick(pos)}>
+    <td data-square={pos} className={styles} onClick={() => onClick()}>
       <div className={fullName}></div>
     </td>
   );
@@ -49,10 +52,10 @@ Square.propTypes = {
   pieces: PropTypes.object.isRequired,
   activeColor: PropTypes.string.isRequired,
   activeSquare: PropTypes.number,
-  availableMoves: PropTypes.array.isRequired,
-
-  onSelectSquare: PropTypes.func.isRequired,
-  onMoveToSquare: PropTypes.func.isRequired,
+  availableMoves: PropTypes.object.isRequired,
+  
+  onSelect: PropTypes.func.isRequired,
+  onMove: PropTypes.func.isRequired,
 };
 
 export default Square;

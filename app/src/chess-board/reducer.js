@@ -4,6 +4,8 @@ import { NEXT_FEN_BOARD } from './actions';
 import {
   COLOR_WHITE,
   COLOR_BLACK,
+  PIECE_WHITE_QUEEN,
+  PIECE_BLACK_QUEEN,
 } from '../utils/constants';
 
 import {
@@ -17,11 +19,18 @@ import {
 
 import {
   SELECT_SQUARE,
-  MOVE_TO_SQUARE,
 } from '../square/actions';
 
+import {
+  MOVE_TYPE_STANDARD,
+  MOVE_TYPE_PAWN_EN_PASSANT,
+  MOVE_TYPE_PAWN_PROMOTION,
+} from '../utils/actions';
 
-function getMoves(pos, board) {
+
+
+
+function getMoves(board, pos) {
   const piece = board[pos];
   return PIECE_TO_MOVES_MAP[piece](pos, board);
 }
@@ -32,7 +41,8 @@ export const initalState = {
   history: [FEN_START,],
   activeColor: getActiveColorFromFEN(FEN_START),
   activeSquare: null,
-  availableMoves: [],
+  availableMoves: {},
+  enPassantPos: null,
 };
 
 function reducer(state = initalState, action) {
@@ -47,32 +57,54 @@ function reducer(state = initalState, action) {
 
     case SELECT_SQUARE:
       const activeSquare = action.square;
-      const availableMoves = getMoves(activeSquare, state.pieces);
+      const availableMoves = getMoves(state.pieces, activeSquare);
       return {
         ...state,
         activeSquare,
         availableMoves,
       };
 
-    case MOVE_TO_SQUARE:
+    case MOVE_TYPE_STANDARD:
+    case MOVE_TYPE_PAWN_EN_PASSANT:
+    case MOVE_TYPE_PAWN_PROMOTION:
+      // TODO: SPLIT MOVES In A Move Reducers
+
       // DONE - swap piece position
       // DONE - get active color
       // DONE - reset activeSquare, and availableMoves
       // generate fen for history
+      let piece = state.pieces[action.fromPos];
 
-      const nextPieces = { ...state.pieces };
-      const piece = state.pieces[state.activeSquare];
-      delete nextPieces[state.activeSquare];
-      nextPieces[action.square] = piece;
+      if (action.type === MOVE_TYPE_PAWN_PROMOTION && state.activeColor === COLOR_WHITE) {
+        piece = PIECE_WHITE_QUEEN;
+      }
+      if (action.type === MOVE_TYPE_PAWN_PROMOTION && state.activeColor === COLOR_BLACK) {
+        piece = PIECE_BLACK_QUEEN;
+      }
+
+      const nextBoard = {
+        ...state.pieces,
+        [action.toPos]: piece,
+        [action.fromPos]: null,
+      };
+
+
+      if (action.type === MOVE_TYPE_PAWN_EN_PASSANT && state.activeColor === COLOR_WHITE) {
+        nextBoard[action.toPos - 1] = null;
+      }
+      if (action.type === MOVE_TYPE_PAWN_EN_PASSANT && state.activeColor === COLOR_BLACK) {
+        nextBoard[action.toPos + 1] = null;
+      }
 
       const nextColor = (state.activeColor === COLOR_WHITE) ? COLOR_BLACK : COLOR_WHITE;
 
       return {
         ...state,
-        pieces: nextPieces,
+        pieces: nextBoard,
         activeColor: nextColor,
         activeSquare: null,
-        availableMoves: [],
+        availableMoves: {},
+        enPassantPos: null,
       };
 
     default:
