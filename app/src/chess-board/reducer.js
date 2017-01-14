@@ -14,7 +14,7 @@ import {
 } from '../utils/fen';
 
 import {
-  PIECE_TO_MOVES_MAP,
+  getMoves,
 } from '../utils/moves';
 
 import {
@@ -26,14 +26,6 @@ import {
   MOVE_TYPE_PAWN_EN_PASSANT,
   MOVE_TYPE_PAWN_PROMOTION,
 } from '../utils/actions';
-
-
-
-
-function getMoves(board, pos) {
-  const piece = board[pos];
-  return PIECE_TO_MOVES_MAP[piece](pos, board);
-}
 
 
 export const initalState = {
@@ -57,7 +49,7 @@ function reducer(state = initalState, action) {
 
     case SELECT_SQUARE:
       const activeSquare = action.square;
-      const availableMoves = getMoves(state.pieces, activeSquare);
+      const availableMoves = getMoves({ board: state.pieces, pos: activeSquare });
       return {
         ...state,
         activeSquare,
