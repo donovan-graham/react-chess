@@ -76,6 +76,10 @@ export function getBoardPosForPiece(board, piece) {
   return null;
 }
 
+export function getNextBoard(board, fromPos, toPos) {
+  // this is missing special states.
+  return { ...board, [toPos]: board[fromPos], [fromPos]: null };
+}
 
 export function isKingInCheck(board, color) {
   const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
@@ -175,7 +179,7 @@ export function kingMoves({ pos, board, color }) {
 
     const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
     if (!isOccupied || isOpponent) {
-      const nextBoard = { ...board, [move]: board[pos], [pos]: null };
+      const nextBoard = getNextBoard(board, pos, move);
       const isCheck = isKingInCheck(nextBoard, color);
 
       if (!isCheck) {
