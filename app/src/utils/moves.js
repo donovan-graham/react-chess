@@ -81,29 +81,90 @@ export function getNextBoard(board, fromPos, toPos) {
   return { ...board, [toPos]: board[fromPos], [fromPos]: null };
 }
 
-export function isKingInCheck(board, color) {
-  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
-  const kingPos = getBoardPosForPiece(board, king);
 
-  const knightOffsets = [12, -8, 21, 19, 8, -12, -21, -19];
+export function flattenNestedMovesToBoard(arr) {
+  /*
+  [['x', 123], ['y', 345]].reduce((acc, t, i) => { acc[t[0]] = t[1]; return acc; }, {});
+      => Object {x: 123, y: 345}
+  */
+  return arr.reduce((acc, child) => {
+    acc[child[0]] = child[1]; return acc;
+  }, {});
+}
+
+
+export function getOffsetGroup(pos, offset, steps = 7, acc = []) {
+  const nextPos = pos + offset;
+  if (steps > 0 && isValidPos(nextPos)) {
+    return getOffsetGroup(nextPos, offset, (steps - 1), [...acc, nextPos]);
+  } else {
+    return acc;
+  }
+}
+
+
+export function isKingInCheck(board, color, kingPos) {
+  // const kingPos = getBoardPosForPiece(board, king);
+  // const activeKing = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
+  // const opponentKing = (color === COLOR_WHITE) ? PIECE_BLACK_KING : PIECE_WHITE_KING;
+
   const knight = (color === COLOR_WHITE) ? PIECE_BLACK_KNIGHT : PIECE_WHITE_KNIGHT;
+  const queen = (color === COLOR_WHITE) ? PIECE_BLACK_QUEEN : PIECE_WHITE_QUEEN;
+  const bishop = (color === COLOR_WHITE) ? PIECE_BLACK_BISHOP : PIECE_WHITE_BISHOP;
+  const rook = (color === COLOR_WHITE) ? PIECE_BLACK_ROOK : PIECE_WHITE_ROOK;
 
   /*
   1. get list of potential attack positions
   2. check those positions are valid
   3. check if thoese position has an oppoent piece that can make the attack
   */
-  const isCheck = knightOffsets
-    .map(offset => kingPos + offset)
-    .filter(isValidPos)
-    .some(attack => {
-      const {
-        isOccupied, isOpponent, piece,
-      } = getOccupiedState(board, attack, color);
-      return (isOccupied && isOpponent && piece === knight);
-    });
+  const lshape = [12, -8, 21, 19, 8, -12, -21, -19];
 
-  return isCheck;
+  const check1 = lshape
+    .map(offset => kingPos + offset)
+    .filter(isValidPos) // isn't good enought ... we need to stop on invalid values, in the directions ...
+    .map(pos => getOccupiedState(board, pos, color))
+    .some(state => state.isOpponent && state.piece === knight);
+
+  if (check1) return true;
+
+  // diagonals: bishop, queen
+  const diagonals = [11, -9, -11, 9];
+
+  const check2 = diagonals
+    .map(offset => getOffsetGroup(kingPos, offset))
+    .map(group => group
+      .map(pos => getOccupiedState(board, pos, color))
+      .find(state => state.isOccupied === true)
+    ).some(state =>
+      !!state && state.isOpponent && [bishop, queen].includes(state.piece));
+
+  if (check2) return true;
+
+
+  // straights: rook, queen
+  const straights = [1, 10, -1, -10];
+
+  const check3 = straights
+    .map(offset => getOffsetGroup(kingPos, offset))
+    .map(group => group
+      .map(pos => getOccupiedState(board, pos, color))
+      .find(state => state.isOccupied === true)
+    ).some(state =>
+      !!state && state.isOpponent && [rook, queen].includes(state.piece));
+
+  if (check3) return true;
+  // king [1]
+  // pawn [1]
+
+  // pawn: front diagonal,
+  //  promotion to queen
+  //  en passant
+
+  // king: 1 squared
+  //  castle
+
+  return false;
 }
 
 // const diagonalLeft = -9;
@@ -171,23 +232,25 @@ export function pawnMoves({ board, pos, color, enPassantPos }) {
 
 export function kingMoves({ pos, board, color }) {
   const offsets = [1, 10, -1, -10, -9, 11, 9, -11];
-  const moves = {};
 
-  offsets.forEach(offset => {
-    const move = pos + offset;
-    if (!isValidPos(move)) return;
+  const m1 = offsets
+    .map(offset => pos + offset)
+    .filter(isValidPos)
+    .filter(move => {
+      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+      return !isOccupied || isOpponent;
+    });
 
-    const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
-    if (!isOccupied || isOpponent) {
+  const m2 = m1.filter(move => {
       const nextBoard = getNextBoard(board, pos, move);
-      const isCheck = isKingInCheck(nextBoard, color);
+      const isCheck = isKingInCheck(nextBoard, color, move);
+      return !isCheck;
+    });
+  console.log("m2", m2);
 
-      if (!isCheck) {
-        moves[move] = moveStandard(pos, move);
-      }
-    }
-  });
-  return moves;
+  const m3 = m2.reduce((acc, move) => ({ ...acc, [move]: moveStandard(pos, move) }), {});
+  console.log("m3", m3);
+  return m3;
 }
 
 export function queenMoves({ pos, board, color }) {
