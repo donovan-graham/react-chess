@@ -18,6 +18,7 @@ import {
 } from './constants';
 
 import {
+  moveNext,
   moveStandard,
   movePawnEnPassant,
   movePawnPromotion,
@@ -230,27 +231,29 @@ export function pawnMoves({ board, pos, color, enPassantPos }) {
 }
 
 
-export function kingMoves({ pos, board, color }) {
+export function kingMoves({ fromPos, board, color }) {
   const offsets = [1, 10, -1, -10, -9, 11, 9, -11];
+  // nextBoard => moveStandard(fromPos, move);
 
-  const m1 = offsets
-    .map(offset => pos + offset)
+  return offsets
+    .map(offset => fromPos + offset)
     .filter(isValidPos)
-    .filter(move => {
-      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
+    .filter(toPos => {
+      const { isOccupied, isOpponent } = getOccupiedState(board, toPos, color);
       return !isOccupied || isOpponent;
-    });
-
-  const m2 = m1.filter(move => {
-      const nextBoard = getNextBoard(board, pos, move);
-      const isCheck = isKingInCheck(nextBoard, color, move);
-      return !isCheck;
-    });
-  console.log("m2", m2);
-
-  const m3 = m2.reduce((acc, move) => ({ ...acc, [move]: moveStandard(pos, move) }), {});
-  console.log("m3", m3);
-  return m3;
+    })
+    .map(toPos => {
+      const nextBoard = getNextBoard(board, fromPos, toPos);
+      return [toPos, nextBoard];
+    })
+    .filter(move => {
+      const [toPos, nextBoard] = move; // toPos === kingPos
+      return !isKingInCheck(nextBoard, color, toPos);
+    })
+    .reduce((acc, move) => {
+      const [toPos, nextBoard] = move;
+      return { ...acc, [toPos]: moveNext(nextBoard) }
+    }, {});
 }
 
 export function queenMoves({ pos, board, color }) {
@@ -356,11 +359,13 @@ export function getMoves({ board, pos }) {
     case PIECE_WHITE_KING:
       movesFn = kingMoves;
       color = COLOR_WHITE;
-      break;
+      return movesFn({ fromPos: pos, board, color });
+      // break;
     case PIECE_BLACK_KING:
       movesFn = kingMoves;
       color = COLOR_BLACK;
-      break;
+      return movesFn({ fromPos: pos, board, color });
+      // break;
     case PIECE_WHITE_QUEEN:
       movesFn = queenMoves;
       color = COLOR_WHITE;

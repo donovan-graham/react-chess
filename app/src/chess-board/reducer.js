@@ -22,6 +22,7 @@ import {
 } from '../square/actions';
 
 import {
+  MOVE_NEXT_BOARD,
   MOVE_TYPE_STANDARD,
   MOVE_TYPE_PAWN_EN_PASSANT,
   MOVE_TYPE_PAWN_PROMOTION,
@@ -94,6 +95,17 @@ function reducer(state = initalState, action) {
         ...state,
         pieces: nextBoard,
         activeColor: nextColor,
+        activeSquare: null,
+        availableMoves: {},
+        enPassantPos: null,
+      };
+
+    case MOVE_NEXT_BOARD:
+      const nextColor1 = (state.activeColor === COLOR_WHITE) ? COLOR_BLACK : COLOR_WHITE;
+      return {
+        ...state,
+        pieces: action.board,
+        activeColor: nextColor1,
         activeSquare: null,
         availableMoves: {},
         enPassantPos: null,
