@@ -25,7 +25,64 @@ import {
 } from './actions';
 
 
-export function getOpponentsColor(color) {
+export const NORTH = 1;
+export const EAST = 10;
+export const SOUTH = -1;
+export const WEST = -10;
+
+export const NORTH_EAST = NORTH + EAST;
+export const SOUTH_EAST = SOUTH + EAST;
+export const SOUTH_WEST = SOUTH + WEST;
+export const NORTH_WEST = NORTH + WEST;
+
+export const NORTH_NORTH_EAST = NORTH + NORTH + EAST;
+export const EAST_NORTH_EAST = EAST + NORTH + EAST;
+export const EAST_SOUTH_EAST = EAST + SOUTH + EAST;
+export const SOUTH_SOUTH_EAST = SOUTH + SOUTH + EAST;
+export const SOUTH_SOUTH_WEST = SOUTH + SOUTH + WEST;
+export const WEST_SOUTH_WEST = WEST + SOUTH + WEST;
+export const WEST_NORTH_WEST = WEST + NORTH + WEST;
+export const NORTH_NORTH_WEST = NORTH + NORTH + WEST;
+
+export const STRAIGHT_OFFSETS = [
+  NORTH,
+  EAST,
+  SOUTH,
+  WEST,
+];
+
+export const DIAGONAL_OFFSETS = [
+  NORTH_EAST,
+  SOUTH_EAST,
+  SOUTH_WEST,
+  NORTH_WEST,
+];
+
+export const KING_OFFSETS = [ ...STRAIGHT_OFFSETS, ...DIAGONAL_OFFSETS ];
+export const QUEEN_OFFSETS = [ ...STRAIGHT_OFFSETS, ...DIAGONAL_OFFSETS ];
+export const BISHOP_OFFSETS = [ ...DIAGONAL_OFFSETS ];
+export const ROOK_OFFSETS = [ ...STRAIGHT_OFFSETS ];
+export const KNIGHT_OFFSETS = [
+  NORTH_NORTH_EAST,
+  EAST_NORTH_EAST,
+  EAST_SOUTH_EAST,
+  SOUTH_SOUTH_EAST,
+  SOUTH_SOUTH_WEST,
+  WEST_SOUTH_WEST,
+  WEST_NORTH_WEST,
+  NORTH_NORTH_WEST
+];
+export const PAWN_COLOR_OFFSETS = {
+  [COLOR_WHITE]: [ NORTH ],
+  [COLOR_BLACK]: [ SOUTH ],
+};
+export const PAWN_COLOR_CAPTURE_OFFSETS = {
+  [COLOR_WHITE]: [ NORTH_EAST, NORTH_WEST ],
+  [COLOR_BLACK]: [ SOUTH_EAST, SOUTH_WEST ],
+};
+
+
+export function getOppositeColor(color) {
   return (color === COLOR_WHITE) ? COLOR_BLACK : COLOR_WHITE;
 }
 
@@ -45,8 +102,8 @@ export function isValidPos(pos) {
 }
 
 export function isOpponentsPiece(piece, color) {
-  const opponentColor = getOpponentsColor(color);
-  return COLOR_TO_PIECES_MAP[opponentColor].indexOf(piece) !== -1;
+  const oppositeColor = getOppositeColor(color);
+  return COLOR_TO_PIECES_MAP[oppositeColor].indexOf(piece) !== -1;
 }
 
 
@@ -94,10 +151,10 @@ export function flattenNestedMovesToBoard(arr) {
 }
 
 
-export function getOffsetGroup(pos, offset, steps = 7, acc = []) {
-  const nextPos = pos + offset;
+export function getPosGroup(startPos, offset, steps = 7, acc = []) {
+  const nextPos = startPos + offset;
   if (steps > 0 && isValidPos(nextPos)) {
-    return getOffsetGroup(nextPos, offset, (steps - 1), [...acc, nextPos]);
+    return getPosGroup(nextPos, offset, (steps - 1), [...acc, nextPos]);
   } else {
     return acc;
   }
@@ -107,71 +164,65 @@ export function getOffsetGroup(pos, offset, steps = 7, acc = []) {
 export function isKingInCheck(board, color, kingPos) {
   // const kingPos = getBoardPosForPiece(board, king);
   // const activeKing = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
-  // const opponentKing = (color === COLOR_WHITE) ? PIECE_BLACK_KING : PIECE_WHITE_KING;
 
-  const knight = (color === COLOR_WHITE) ? PIECE_BLACK_KNIGHT : PIECE_WHITE_KNIGHT;
-  const queen = (color === COLOR_WHITE) ? PIECE_BLACK_QUEEN : PIECE_WHITE_QUEEN;
-  const bishop = (color === COLOR_WHITE) ? PIECE_BLACK_BISHOP : PIECE_WHITE_BISHOP;
-  const rook = (color === COLOR_WHITE) ? PIECE_BLACK_ROOK : PIECE_WHITE_ROOK;
+  const oppositeKing = (color === COLOR_WHITE) ? PIECE_BLACK_KING : PIECE_WHITE_KING;
+  const oppositeQueen = (color === COLOR_WHITE) ? PIECE_BLACK_QUEEN : PIECE_WHITE_QUEEN;
+  const oppositeBishop = (color === COLOR_WHITE) ? PIECE_BLACK_BISHOP : PIECE_WHITE_BISHOP;
+  const oppositeRook = (color === COLOR_WHITE) ? PIECE_BLACK_ROOK : PIECE_WHITE_ROOK;
+  const oppositeKnight = (color === COLOR_WHITE) ? PIECE_BLACK_KNIGHT : PIECE_WHITE_KNIGHT;
+  const oppositePawn = (color === COLOR_WHITE) ? PIECE_BLACK_PAWN: PIECE_WHITE_PAWN;
 
   /*
-  1. get list of potential attack positions
-  2. check those positions are valid
-  3. check if thoese position has an oppoent piece that can make the attack
+    1. get list of potential attack positions
+    2. check those positions are valid
+    3. check if thoese position has an oppoent piece that can make the attack
   */
-  const lshape = [12, -8, 21, 19, 8, -12, -21, -19];
 
-  const check1 = lshape
+  const isCheckOnDiagonal = DIAGONAL_OFFSETS
+    .map(offset => getPosGroup(kingPos, offset))
+    .map(group => group
+      .map(pos => getOccupiedState(board, pos, color))
+      .find(state => state.isOccupied === true)
+    ).some(state =>
+      !!state && state.isOpponent &&
+        [oppositeBishop, oppositeQueen].includes(state.piece));
+
+  if (isCheckOnDiagonal) return true;
+
+  const isCheckOnStraight = STRAIGHT_OFFSETS
+    .map(offset => getPosGroup(kingPos, offset))
+    .map(group => group
+      .map((pos, step) => ({
+        step,
+        ...getOccupiedState(board, pos, color),
+      }))
+      .find(state => state.isOccupied === true)
+    ).some(state =>
+      !!state && state.isOpponent &&
+        ([oppositeRook, oppositeQueen].includes(state.piece) ||
+          (state.step === 1 && state.piece === oppositeKing)));
+
+  if (isCheckOnStraight) return true;
+
+  const isCheckByKnight = KNIGHT_OFFSETS
     .map(offset => kingPos + offset)
-    .filter(isValidPos) // isn't good enought ... we need to stop on invalid values, in the directions ...
+    .filter(isValidPos)
     .map(pos => getOccupiedState(board, pos, color))
-    .some(state => state.isOpponent && state.piece === knight);
+    .some(state => state.isOpponent && state.piece === oppositeKnight);
 
-  if (check1) return true;
+  if (isCheckByKnight) return true;
 
-  // diagonals: bishop, queen
-  const diagonals = [11, -9, -11, 9];
+  // Pawn attack is inverted as we're looking at it from the kings perspective
+  const isCheckByPawn = PAWN_COLOR_CAPTURE_OFFSETS[color]
+    .map(offset => kingPos + offset)
+    .filter(isValidPos)
+    .map(pos => getOccupiedState(board, pos, color))
+    .some(state => state.isOpponent && state.piece === oppositePawn);
 
-  const check2 = diagonals
-    .map(offset => getOffsetGroup(kingPos, offset))
-    .map(group => group
-      .map(pos => getOccupiedState(board, pos, color))
-      .find(state => state.isOccupied === true)
-    ).some(state =>
-      !!state && state.isOpponent && [bishop, queen].includes(state.piece));
-
-  if (check2) return true;
-
-
-  // straights: rook, queen
-  const straights = [1, 10, -1, -10];
-
-  const check3 = straights
-    .map(offset => getOffsetGroup(kingPos, offset))
-    .map(group => group
-      .map(pos => getOccupiedState(board, pos, color))
-      .find(state => state.isOccupied === true)
-    ).some(state =>
-      !!state && state.isOpponent && [rook, queen].includes(state.piece));
-
-  if (check3) return true;
-  // king [1]
-  // pawn [1]
-
-  // pawn: front diagonal,
-  //  promotion to queen
-  //  en passant
-
-  // king: 1 squared
-  //  castle
+  if (isCheckByPawn) return true;
 
   return false;
 }
-
-// const diagonalLeft = -9;
-// const diagonalRight = 11;
-// const forward = 1;
-// const back = -1;
 
 // enPassantPos = 45 for testing
 export function pawnMoves({ board, pos, color, enPassantPos }) {
@@ -232,10 +283,7 @@ export function pawnMoves({ board, pos, color, enPassantPos }) {
 
 
 export function kingMoves({ fromPos, board, color }) {
-  const offsets = [1, 10, -1, -10, -9, 11, 9, -11];
-  // nextBoard => moveStandard(fromPos, move);
-
-  return offsets
+  return KING_OFFSETS
     .map(offset => fromPos + offset)
     .filter(isValidPos)
     .filter(toPos => {
@@ -247,7 +295,7 @@ export function kingMoves({ fromPos, board, color }) {
       return [toPos, nextBoard];
     })
     .filter(move => {
-      const [toPos, nextBoard] = move; // toPos === kingPos
+      const [toPos, nextBoard] = move; // King's toPos === kingPos
       return !isKingInCheck(nextBoard, color, toPos);
     })
     .reduce((acc, move) => {
