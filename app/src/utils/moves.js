@@ -380,21 +380,29 @@ export function bishopMoves({ pos, board, color }) {
 }
 
 
-export function knightMoves({ pos, board, color }) {
-  const offsets = [12, -8, 21, 19, 8, -12, -21, -19];
-  const moves = {};
+export function knightMoves({ fromPos, board, color }) {
+  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING ;
+  const kingPos = getBoardPosForPiece(board, king);
 
-  offsets.forEach(offset => {
-    const move = pos + offset;
-    if (!isValidPos(move)) return;
-
-    const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
-    if (!isOccupied || isOpponent) {
-      moves[move] = moveStandard(pos, move);
-    }
-  });
-
-  return moves;
+  return KNIGHT_OFFSETS
+    .map(offset => fromPos + offset)
+    .filter(isValidPos)
+    .filter(toPos => {
+      const { isOccupied, isOpponent } = getOccupiedState(board, toPos, color);
+      return !isOccupied || isOpponent;
+    })
+    .map(toPos => {
+      const nextBoard = getNextBoard(board, fromPos, toPos);
+      return [toPos, nextBoard];
+    })
+    .filter(move => {
+      const [, nextBoard] = move;
+      return !isKingInCheck(nextBoard, color, kingPos);
+    })
+    .reduce((acc, move) => {
+      const [toPos, nextBoard] = move;
+      return { ...acc, [toPos]: moveNext(nextBoard) }
+    }, {});
 }
 
 
@@ -433,11 +441,13 @@ export function getMoves({ board, pos }) {
     case PIECE_WHITE_KNIGHT:
       movesFn = knightMoves;
       color = COLOR_WHITE;
-      break;
+      return movesFn({ fromPos: pos, board, color });
+      // break;
     case PIECE_BLACK_KNIGHT:
       movesFn = knightMoves;
       color = COLOR_BLACK;
-      break;
+      return movesFn({ fromPos: pos, board, color });
+      // break;
     case PIECE_WHITE_ROOK:
       movesFn = rookMoves;
       color = COLOR_WHITE;
