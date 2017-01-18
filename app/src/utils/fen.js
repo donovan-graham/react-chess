@@ -3,30 +3,28 @@ import {
   COLOR_BLACK,
 } from './constants';
 
-function replaceEmptyCounterWithChar(str, char = '.', counter = 8) {
-  if (counter < 1) {
-    return str;
-  } else {
-    const newStr = str.replace(counter, char.repeat(counter))
-    return replaceEmptyCounterWithChar(newStr, char, counter - 1);
-  }
-}
-
 function getBoardStateFromFEN(fen) {
-  const emptyChar = '.';
-  const simpleRanks = fen.split(' ')[0].split('/');
+  const rankStr = fen.split(' ')[0]
+    .replace(/8/g, '********')
+    .replace(/7/g, '*******')
+    .replace(/6/g, '******')
+    .replace(/5/g, '*****')
+    .replace(/4/g, '****')
+    .replace(/3/g, '***')
+    .replace(/2/g, '**')
+    .replace(/1/g, '*');
 
-  const filledRanks = simpleRanks.map(rankString =>
-    Array.from(replaceEmptyCounterWithChar(rankString, emptyChar)));
+  const ranks = rankStr
+    .split('/')
+    .map(str => Array.from(str))
+    .map((rank, y) =>
+      rank.reduce((acc, char, x) => {
+        const pos = (x * 10) + (7 - y);
+        acc[pos] = (char === '*') ? null : char;
+        return acc;
+      }, {}));
 
-  const board = filledRanks.map((rankString, y) =>
-    rankString.reduce((acc, char, x) => {
-      const square = (x * 10) + (7 - y);
-      acc[square] = (char === emptyChar) ? null : char;
-      return acc;
-    }, {}));
-
-  return Object.assign({}, ...board);
+  return Object.assign({}, ...ranks);
 }
 
 function getEnPassantTargetSquareFromFEN(fen) {

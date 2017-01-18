@@ -147,4 +147,21 @@ describe('fen.getBoardStateFromFEN', () => {
     expect(JSON.stringify(getBoardStateFromFEN(fen)))
       .toEqual(JSON.stringify(board));
   });
+
+  it('board with two 1 in same rank ', () => {
+    const fen = 'rnbqkbnr/ppp1pppp/8/8/8/8/PPP4P/RNB1K1NR w KQkq - 0 1';
+    const board = {
+      7: 'r', 17: 'n', 27: 'b', 37: 'q', 47: 'k', 57: 'b', 67: 'n', 77: 'r',
+      6: 'p', 16: 'p', 26: 'p', 36: nil, 46: 'p', 56: 'p', 66: 'p', 76: 'p',
+      5: nil, 15: nil, 25: nil, 35: nil, 45: nil, 55: nil, 65: nil, 75: nil,
+      4: nil, 14: nil, 24: nil, 34: nil, 44: nil, 54: nil, 64: nil, 74: nil,
+      3: nil, 13: nil, 23: nil, 33: nil, 43: nil, 53: nil, 63: nil, 73: nil,
+      2: nil, 12: nil, 22: nil, 32: nil, 42: nil, 52: nil, 62: nil, 72: nil,
+      1: 'P', 11: 'P', 21: 'P', 31: nil, 41: nil, 51: nil, 61: nil, 71: 'P',
+      0: 'R', 10: 'N', 20: 'B', 30: nil, 40: 'K', 50: nil, 60: 'N', 70: 'R',
+    };
+
+    expect(JSON.stringify(getBoardStateFromFEN(fen)))
+      .toEqual(JSON.stringify(board));
+  });
 });
