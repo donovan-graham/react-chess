@@ -155,9 +155,27 @@ export function getPosGroup(startPos, offset, steps = 7, acc = []) {
   const nextPos = startPos + offset;
   if (steps > 0 && isValidPos(nextPos)) {
     return getPosGroup(nextPos, offset, (steps - 1), [...acc, nextPos]);
-  } else {
+  }
+  return acc;
+}
+
+
+export function getPosUntilOccupied(board, group, color, acc = []) {
+  if (!group || group.length <= 0) {
     return acc;
   }
+
+  const [firstPos, ...nextGroup] = [...group];
+  const { isOccupied, isOpponent } = getOccupiedState(board, firstPos, color);
+  if (isOccupied && !isOpponent) {
+    return acc;
+  }
+
+  const nextAcc = [...acc, firstPos];
+  if (isOccupied && isOpponent) {
+    return nextAcc;
+  }
+  return getPosUntilOccupied(board, nextGroup, color, nextAcc);
 }
 
 
@@ -300,88 +318,88 @@ export function kingMoves({ fromPos, board, color }) {
     })
     .reduce((acc, move) => {
       const [toPos, nextBoard] = move;
-      return { ...acc, [toPos]: moveNext(nextBoard) }
+      return { ...acc, [toPos]: moveNext(nextBoard) };
     }, {});
 }
 
-export function queenMoves({ pos, board, color }) {
-  const offsets = [1, 10, -1, -10, -9, 11, 9, -11];
-  const repeat = 7;
-  const moves = {};
 
-  offsets.forEach(offset => {
-    let i;
-    let move = pos;
+export function queenMoves({ fromPos, board, color }) {
+  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
+  const kingPos = getBoardPosForPiece(board, king);
 
-    for (i = 0; i < repeat; i++) {
-      move += offset;
-      if (!isValidPos(move)) break;
+  const moveGroups = QUEEN_OFFSETS
+    .map(offset => getPosGroup(fromPos, offset))
+    .map(group => getPosUntilOccupied(board, group, color))
+    .map(group => group
+      .map(toPos => {
+        const nextBoard = getNextBoard(board, fromPos, toPos);
+        return [toPos, nextBoard];
+      })
+      .filter(move => {
+        const [, nextBoard] = move;
+        return !isKingInCheck(nextBoard, color, kingPos);
+      })
+      .reduce((acc, move) => {
+        const [toPos, nextBoard] = move;
+        return { ...acc, [toPos]: moveNext(nextBoard) };
+      }, {}));
 
-      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
-      if (!isOccupied || isOpponent) {
-        moves[move] = moveStandard(pos, move);
-      }
-      if (isOccupied) break;
-    }
-  });
-
-  return moves;
+  return Object.assign({}, ...moveGroups);
 }
 
 
-export function rookMoves({ pos, board, color }) {
-  const offsets = [1, 10, -1, -10];
-  const repeat = 7;
-  const moves = {};
+export function rookMoves({ fromPos, board, color }) {
+  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
+  const kingPos = getBoardPosForPiece(board, king);
 
-  offsets.forEach(offset => {
-    let i;
-    let move = pos;
+  const moveGroups = ROOK_OFFSETS
+    .map(offset => getPosGroup(fromPos, offset))
+    .map(group => getPosUntilOccupied(board, group, color))
+    .map(group => group
+      .map(toPos => {
+        const nextBoard = getNextBoard(board, fromPos, toPos);
+        return [toPos, nextBoard];
+      })
+      .filter(move => {
+        const [, nextBoard] = move;
+        return !isKingInCheck(nextBoard, color, kingPos);
+      })
+      .reduce((acc, move) => {
+        const [toPos, nextBoard] = move;
+        return { ...acc, [toPos]: moveNext(nextBoard) };
+      }, {}));
 
-    for (i = 0; i < repeat; i++) {
-      move += offset;
-      if (!isValidPos(move)) break;
-
-      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
-      if (!isOccupied || isOpponent) {
-        moves[move] = moveStandard(pos, move);
-      }
-      if (isOccupied) break;
-    }
-  });
-
-  return moves;
+  return Object.assign({}, ...moveGroups);
 }
 
 
-export function bishopMoves({ pos, board, color }) {
-  const offsets = [-9, 11, 9, -11];
-  const repeat = 7;
-  const moves = {};
+export function bishopMoves({ fromPos, board, color }) {
+  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
+  const kingPos = getBoardPosForPiece(board, king);
 
-  offsets.forEach(offset => {
-    let i;
-    let move = pos;
+  const moveGroups = BISHOP_OFFSETS
+    .map(offset => getPosGroup(fromPos, offset))
+    .map(group => getPosUntilOccupied(board, group, color))
+    .map(group => group
+      .map(toPos => {
+        const nextBoard = getNextBoard(board, fromPos, toPos);
+        return [toPos, nextBoard];
+      })
+      .filter(move => {
+        const [, nextBoard] = move;
+        return !isKingInCheck(nextBoard, color, kingPos);
+      })
+      .reduce((acc, move) => {
+        const [toPos, nextBoard] = move;
+        return { ...acc, [toPos]: moveNext(nextBoard) };
+      }, {}));
 
-    // TODO:  implement as tail recursion....
-    for (i = 0; i < repeat; i++) {
-      move += offset;
-      if (!isValidPos(move)) break;
-
-      const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
-      if (!isOccupied || isOpponent) {
-        moves[move] = moveStandard(pos, move);
-      }
-      if (isOccupied) break;
-    }
-  });
-
-  return moves;
+  return Object.assign({}, ...moveGroups);
 }
 
 
 export function knightMoves({ fromPos, board, color }) {
-  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING ;
+  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
   const kingPos = getBoardPosForPiece(board, king);
 
   return KNIGHT_OFFSETS
@@ -401,74 +419,43 @@ export function knightMoves({ fromPos, board, color }) {
     })
     .reduce((acc, move) => {
       const [toPos, nextBoard] = move;
-      return { ...acc, [toPos]: moveNext(nextBoard) }
+      return { ...acc, [toPos]: moveNext(nextBoard) };
     }, {});
 }
 
 
 export function getMoves({ board, pos }) {
   const piece = getPieceAtPos(board, pos);
-  let movesFn;
-  let color;
 
   switch(piece) {
     case PIECE_WHITE_KING:
-      movesFn = kingMoves;
-      color = COLOR_WHITE;
-      return movesFn({ fromPos: pos, board, color });
-      // break;
+      return kingMoves({ fromPos: pos, board, color: COLOR_WHITE });
     case PIECE_BLACK_KING:
-      movesFn = kingMoves;
-      color = COLOR_BLACK;
-      return movesFn({ fromPos: pos, board, color });
-      // break;
+      return kingMoves({ fromPos: pos, board, color: COLOR_BLACK });
     case PIECE_WHITE_QUEEN:
-      movesFn = queenMoves;
-      color = COLOR_WHITE;
-      break;
+      return queenMoves({ fromPos: pos, board, color: COLOR_WHITE });
     case PIECE_BLACK_QUEEN:
-      movesFn = queenMoves;
-      color = COLOR_BLACK;
-      break;
+      return queenMoves({ fromPos: pos, board, color: COLOR_BLACK });
     case PIECE_WHITE_BISHOP:
-      movesFn = bishopMoves;
-      color = COLOR_WHITE;
-      break;
+      return bishopMoves({ fromPos: pos, board, color: COLOR_WHITE });
     case PIECE_BLACK_BISHOP:
-      movesFn = bishopMoves;
-      color = COLOR_BLACK;
-      break;
+      return bishopMoves({ fromPos: pos, board, color: COLOR_BLACK });
     case PIECE_WHITE_KNIGHT:
-      movesFn = knightMoves;
-      color = COLOR_WHITE;
-      return movesFn({ fromPos: pos, board, color });
-      // break;
+      return knightMoves({ fromPos: pos, board, color: COLOR_WHITE });
     case PIECE_BLACK_KNIGHT:
-      movesFn = knightMoves;
-      color = COLOR_BLACK;
-      return movesFn({ fromPos: pos, board, color });
-      // break;
+      return knightMoves({ fromPos: pos, board, color: COLOR_BLACK });
     case PIECE_WHITE_ROOK:
-      movesFn = rookMoves;
-      color = COLOR_WHITE;
-      break;
+      return rookMoves({ fromPos: pos, board, color: COLOR_WHITE });
     case PIECE_BLACK_ROOK:
-      movesFn = rookMoves;
-      color = COLOR_BLACK;
-      break;
+      return rookMoves({ fromPos: pos, board, color: COLOR_BLACK });
     case PIECE_WHITE_PAWN:
-      movesFn = pawnMoves;
-      color = COLOR_WHITE;
-      break;
+      return pawnMoves({ pos, board, color: COLOR_WHITE });
     case PIECE_BLACK_PAWN:
-      movesFn = pawnMoves;
-      color = COLOR_BLACK;
-      break;
+      return pawnMoves({ pos, board, color: COLOR_BLACK });
     default:
       console.error(`Moves not implements for "${piece}"`);
-      break;
+      return [];
   }
-  return movesFn({ pos, board, color });
 }
 
 
