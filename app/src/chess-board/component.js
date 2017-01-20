@@ -19,7 +19,7 @@ const ChessBoard = () => {
   const rows = ys.map(y => <Row key={y} y={y} />);
   return (
     <div>
-      <table className="chess-board">
+      <table cellPadding={0} cellSpacing={1} className="chess-board">
         <tbody>
           {rows}
         </tbody>

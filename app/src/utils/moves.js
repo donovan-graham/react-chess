@@ -19,9 +19,7 @@ import {
 
 import {
   moveNext,
-  moveStandard,
-  movePawnEnPassant,
-  movePawnPromotion,
+  movePawnTwoSteps,
 } from './actions';
 
 
@@ -72,6 +70,7 @@ export const KNIGHT_OFFSETS = [
   WEST_NORTH_WEST,
   NORTH_NORTH_WEST
 ];
+
 export const PAWN_COLOR_OFFSETS = {
   [COLOR_WHITE]: [ NORTH ],
   [COLOR_BLACK]: [ SOUTH ],
@@ -160,7 +159,7 @@ export function getPosGroup(startPos, offset, steps = 7, acc = []) {
 }
 
 
-export function getPosUntilOccupied(board, group, color, acc = []) {
+export function takePosUntilOccupied(board, group, color, acc = []) {
   if (!group || group.length <= 0) {
     return acc;
   }
@@ -175,8 +174,24 @@ export function getPosUntilOccupied(board, group, color, acc = []) {
   if (isOccupied && isOpponent) {
     return nextAcc;
   }
-  return getPosUntilOccupied(board, nextGroup, color, nextAcc);
+  return takePosUntilOccupied(board, nextGroup, color, nextAcc);
 }
+
+export function takePosBeforeOccupied(board, group, color, acc = []) {
+  if (!group || group.length <= 0) {
+    return acc;
+  }
+
+  const [firstPos, ...nextGroup] = [...group];
+  const { isOccupied } = getOccupiedState(board, firstPos, color);
+  if (isOccupied) {
+    return acc;
+  }
+
+  const nextAcc = [...acc, firstPos];
+  return takePosBeforeOccupied(board, nextGroup, color, nextAcc);
+}
+
 
 
 export function isKingInCheck(board, color, kingPos) {
@@ -242,66 +257,9 @@ export function isKingInCheck(board, color, kingPos) {
   return false;
 }
 
-// enPassantPos = 45 for testing
-export function pawnMoves({ board, pos, color, enPassantPos }) {
-  let offsets;
-  let captures;
-  let repeat;
-  let yPromotion;
-  const moves = {};
-
-  const { y } = getCoordinatesFromPos(pos);
-
-  if (color === COLOR_WHITE) {
-    repeat = (y === 1) ? 2 : 1;
-    offsets = [1];
-    captures = [-9, 11];
-    yPromotion = 6;
-  } else {
-    repeat = (y === 6) ? 2 : 1;
-    offsets = [-1];
-    captures = [9, -11];
-    yPromotion = 1;
-  }
-
-  offsets.forEach(offset => {
-    let i;
-    let move = pos;
-
-    for (i = 0; i < repeat; i++) {
-      move += offset;
-      if (!isValidPos(move)) break;
-
-      const { isOccupied } = getOccupiedState(board, move, color);
-      if (isOccupied) break;
-
-      const moveAction = (y === yPromotion) ? movePawnPromotion : moveStandard;
-      moves[move] = moveAction(pos, move);
-    }
-  });
-
-  captures.forEach(capture => {
-    const move = pos + capture;
-    if (!isValidPos(move)) return;
-
-    const { isOccupied, isOpponent } = getOccupiedState(board, move, color);
-    if (!isOccupied && move === enPassantPos) {
-      moves[move] = movePawnEnPassant(pos, move);
-      return;
-    }
-
-    if (isOccupied && isOpponent) {
-      const moveAction = (y === yPromotion) ? movePawnPromotion : moveStandard;
-      moves[move] = moveAction(pos, move);
-      return;
-    }
-  });
-  return moves;
-}
-
 
 export function kingMoves({ fromPos, board, color }) {
-  return KING_OFFSETS
+  const moves = KING_OFFSETS
     .map(offset => fromPos + offset)
     .filter(isValidPos)
     .filter(toPos => {
@@ -320,6 +278,8 @@ export function kingMoves({ fromPos, board, color }) {
       const [toPos, nextBoard] = move;
       return { ...acc, [toPos]: moveNext(nextBoard) };
     }, {});
+
+    return moves;
 }
 
 
@@ -329,7 +289,7 @@ export function queenMoves({ fromPos, board, color }) {
 
   const moveGroups = QUEEN_OFFSETS
     .map(offset => getPosGroup(fromPos, offset))
-    .map(group => getPosUntilOccupied(board, group, color))
+    .map(group => takePosUntilOccupied(board, group, color))
     .map(group => group
       .map(toPos => {
         const nextBoard = getNextBoard(board, fromPos, toPos);
@@ -354,7 +314,7 @@ export function rookMoves({ fromPos, board, color }) {
 
   const moveGroups = ROOK_OFFSETS
     .map(offset => getPosGroup(fromPos, offset))
-    .map(group => getPosUntilOccupied(board, group, color))
+    .map(group => takePosUntilOccupied(board, group, color))
     .map(group => group
       .map(toPos => {
         const nextBoard = getNextBoard(board, fromPos, toPos);
@@ -379,7 +339,7 @@ export function bishopMoves({ fromPos, board, color }) {
 
   const moveGroups = BISHOP_OFFSETS
     .map(offset => getPosGroup(fromPos, offset))
-    .map(group => getPosUntilOccupied(board, group, color))
+    .map(group => takePosUntilOccupied(board, group, color))
     .map(group => group
       .map(toPos => {
         const nextBoard = getNextBoard(board, fromPos, toPos);
@@ -424,34 +384,111 @@ export function knightMoves({ fromPos, board, color }) {
 }
 
 
-export function getMoves({ board, pos }) {
-  const piece = getPieceAtPos(board, pos);
+// enPassantPos = 45 for testing
+export function pawnMoves({ board, fromPos, color, enPassantPos }) {
+  const king = (color === COLOR_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
+  const kingPos = getBoardPosForPiece(board, king);
+
+  const { y } = getCoordinatesFromPos(fromPos);
+
+  const isFirstMoveWhite = (color === COLOR_WHITE && y === 1);
+  const isFirstMoveBlack = (color === COLOR_BLACK && y === 6);
+  const moveSteps = (isFirstMoveWhite || isFirstMoveBlack) ? 2 : 1
+
+  let piece;
+  if (color === COLOR_WHITE) {
+    piece = (y === 6) ? PIECE_WHITE_QUEEN : PIECE_WHITE_PAWN;
+  } else {
+    piece = (y === 1) ? PIECE_BLACK_QUEEN : PIECE_BLACK_PAWN;
+  }
+
+  // promote to queen
+  const moveBoard = { ...board, [fromPos]: piece };
+
+  const moveGroups = PAWN_COLOR_OFFSETS[color]
+    .map(offset => getPosGroup(fromPos, offset, moveSteps))
+    .map(group => takePosBeforeOccupied(moveBoard, group, color))
+    .map(group => group
+      .map(toPos => {
+        const nextBoard = getNextBoard(moveBoard, fromPos, toPos);
+        return [toPos, nextBoard];
+      })
+      .filter(move => {
+        const [, nextBoard] = move;
+        return !isKingInCheck(nextBoard, color, kingPos);
+      })
+      .reduce((acc, move, i) => {
+        const [toPos, nextBoard] = move;
+        if (i === 0) {
+          return { ...acc, [toPos]: moveNext(nextBoard) };
+        }
+        const oppositeColor = getOppositeColor(color);
+        const capturePos = toPos + PAWN_COLOR_OFFSETS[oppositeColor][0];
+        return { ...acc, [toPos]: movePawnTwoSteps(nextBoard, capturePos) };
+      }, {}));
+
+  const captures = PAWN_COLOR_CAPTURE_OFFSETS[color]
+    .map(offset => fromPos + offset)
+    .filter(isValidPos)
+    .filter(toPos => {
+      if (toPos === enPassantPos) {
+        return true;
+      }
+      const { isOccupied, isOpponent } = getOccupiedState(moveBoard, toPos, color);
+      return isOccupied && isOpponent;
+    })
+    .map(toPos => {
+      if (toPos === enPassantPos) {
+        const oppositeColor = getOppositeColor(color);
+        const capturePos = toPos + PAWN_COLOR_OFFSETS[oppositeColor][0];
+        const captureBoard = { ...moveBoard, [capturePos]: null };
+        const nextCaptureBoard = getNextBoard(captureBoard, fromPos, toPos);
+        return [toPos, nextCaptureBoard];
+      }
+      const nextBoard = getNextBoard(moveBoard, fromPos, toPos);
+      return [toPos, nextBoard];
+    })
+    .filter(move => {
+      const [, nextBoard] = move;
+      return !isKingInCheck(nextBoard, color, kingPos);
+    })
+    .reduce((acc, move) => {
+      const [toPos, nextBoard] = move;
+      return { ...acc, [toPos]: moveNext(nextBoard) };
+    }, {});
+
+  return Object.assign({}, ...moveGroups, captures);
+}
+
+
+export function getMoves({ board, fromPos, enPassantPos }) {
+  const piece = getPieceAtPos(board, fromPos);
 
   switch(piece) {
     case PIECE_WHITE_KING:
-      return kingMoves({ fromPos: pos, board, color: COLOR_WHITE });
+      return kingMoves({ board, fromPos, enPassantPos, color: COLOR_WHITE });
     case PIECE_BLACK_KING:
-      return kingMoves({ fromPos: pos, board, color: COLOR_BLACK });
+      return kingMoves({ board, fromPos, enPassantPos, color: COLOR_BLACK });
     case PIECE_WHITE_QUEEN:
-      return queenMoves({ fromPos: pos, board, color: COLOR_WHITE });
+      return queenMoves({ board, fromPos, enPassantPos, color: COLOR_WHITE });
     case PIECE_BLACK_QUEEN:
-      return queenMoves({ fromPos: pos, board, color: COLOR_BLACK });
+      return queenMoves({ board, fromPos, enPassantPos, color: COLOR_BLACK });
     case PIECE_WHITE_BISHOP:
-      return bishopMoves({ fromPos: pos, board, color: COLOR_WHITE });
+      return bishopMoves({ board, fromPos, enPassantPos, color: COLOR_WHITE });
     case PIECE_BLACK_BISHOP:
-      return bishopMoves({ fromPos: pos, board, color: COLOR_BLACK });
+      return bishopMoves({ board, fromPos, enPassantPos, color: COLOR_BLACK });
     case PIECE_WHITE_KNIGHT:
-      return knightMoves({ fromPos: pos, board, color: COLOR_WHITE });
+      return knightMoves({ board, fromPos, enPassantPos, color: COLOR_WHITE });
     case PIECE_BLACK_KNIGHT:
-      return knightMoves({ fromPos: pos, board, color: COLOR_BLACK });
+      return knightMoves({ board, fromPos, enPassantPos, color: COLOR_BLACK });
     case PIECE_WHITE_ROOK:
-      return rookMoves({ fromPos: pos, board, color: COLOR_WHITE });
+      return rookMoves({ board, fromPos, enPassantPos, color: COLOR_WHITE });
     case PIECE_BLACK_ROOK:
-      return rookMoves({ fromPos: pos, board, color: COLOR_BLACK });
+      return rookMoves({ board, fromPos, enPassantPos, color: COLOR_BLACK });
     case PIECE_WHITE_PAWN:
-      return pawnMoves({ pos, board, color: COLOR_WHITE });
+      return pawnMoves({ board, fromPos, enPassantPos, color: COLOR_WHITE });
     case PIECE_BLACK_PAWN:
-      return pawnMoves({ pos, board, color: COLOR_BLACK });
+      return pawnMoves({ board, fromPos, enPassantPos, color: COLOR_BLACK });
     default:
       console.error(`Moves not implements for "${piece}"`);
       return [];

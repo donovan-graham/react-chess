@@ -1,4 +1,5 @@
 export const MOVE_NEXT_BOARD = 'MOVE_NEXT_BOARD';
+export const MOVE_TYPE_PAWN_TWO_STEPS = 'MOVE_TYPE_PAWN_TWO_STEPS';
 export const MOVE_TYPE_STANDARD = 'MOVE_TYPE_STANDARD';
 export const MOVE_TYPE_PAWN_EN_PASSANT = 'MOVE_TYPE_PAWN_EN_PASSANT';
 export const MOVE_TYPE_PAWN_PROMOTION = 'MOVE_TYPE_PAWN_PROMOTION';
@@ -14,6 +15,12 @@ export const moveAction = (type, fromPos, toPos) => ({
 export const moveNext = (board) => ({
   type: MOVE_NEXT_BOARD,
   board,
+});
+
+export const movePawnTwoSteps = (board, enPassantPos) => ({
+  type: MOVE_TYPE_PAWN_TWO_STEPS,
+  board,
+  enPassantPos,
 });
 
 

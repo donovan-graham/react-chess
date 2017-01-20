@@ -1,5 +1,5 @@
 table.chess-board {
-  border: 1px solid #CCCCCC;
+  border: 1px solid #dddddd;
   cellspacing: 0px;
   margin: 20px;
 }
@@ -12,32 +12,63 @@ table.chess-board td {
   font-size: 32px;
   text-align: center;
   box-sizing: border-box;
-  border: 1px solid transparent;
 }
 
+/*
+https://coolors.co/6aacba-9ac8d1-c9dee2-708089-8fa0aa
+
+#6AACBA // MOONSTONE BLUE
+#9AC8D1 // PALE CERULEAN
+#C9DEE2 // COLUMBIA BLUE
+#708089 // SLATE GRAY
+#8FA0AA // CADET GREY
+
+https://coolors.co/cee5f2-accbe1-7c98b3-637081-536b78
+#CEE5F2 // AZUREISH WHITE
+#ACCBE1 // LIGHT STEEL BLUE
+#7C98B3 // WELDON BLUE
+#637081 // AUROMETALSAURUS
+#536B78 // PAYNE'S GREY
+
+
+https://coolors.co/6aacba-9ac8d1-c9dee2-a4aeb3-a3b1b9
+#A4AEB3 // SILVER CHALICE
+*/
+
 table.chess-board td.black {
-  background-color: #CCCCCC;
+  background-color: #dddddd;
+  transition: background-color 120ms ease;
 }
 
 table.chess-board td.white {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
+  transition: background-color 120ms ease;
 }
 
 
-table.chess-board td.can-select {
-  border-style: inset;
-  border-color: blue;
+table.chess-board td.black.can-select:hover {
+  background-color: #D1D6E4;
+}
+table.chess-board td.white.can-select:hover {
+  background-color: #EEF0FA;
 }
 
-table.chess-board td.is-active {
-  border-style: inset;
-  border-color: orange;
+table.chess-board td.black.is-active {
+  background-color: #D1D6E4;
+}
+table.chess-board td.white.is-active {
+  background-color: #EEF0FA;
 }
 
-table.chess-board td.is-move {
-  border-style: inset;
-  border-color: green;
+
+table.chess-board td.black.is-move {
+  background-color: #B7D8E5;
 }
+table.chess-board td.white.is-move {
+  background-color: #D9EBF2;
+}
+
+
 
 
 .white-king:before {
