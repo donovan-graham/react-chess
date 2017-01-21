@@ -164,13 +164,13 @@ export function takePosUntilOccupied(board, group, color, acc = []) {
     return acc;
   }
 
-  const [firstPos, ...nextGroup] = [...group];
-  const { isOccupied, isOpponent } = getOccupiedState(board, firstPos, color);
+  const [headPos, ...nextGroup] = [...group];
+  const { isOccupied, isOpponent } = getOccupiedState(board, headPos, color);
   if (isOccupied && !isOpponent) {
     return acc;
   }
 
-  const nextAcc = [...acc, firstPos];
+  const nextAcc = [...acc, headPos];
   if (isOccupied && isOpponent) {
     return nextAcc;
   }
@@ -182,13 +182,13 @@ export function takePosBeforeOccupied(board, group, color, acc = []) {
     return acc;
   }
 
-  const [firstPos, ...nextGroup] = [...group];
-  const { isOccupied } = getOccupiedState(board, firstPos, color);
+  const [headPos, ...nextGroup] = [...group];
+  const { isOccupied } = getOccupiedState(board, headPos, color);
   if (isOccupied) {
     return acc;
   }
 
-  const nextAcc = [...acc, firstPos];
+  const nextAcc = [...acc, headPos];
   return takePosBeforeOccupied(board, nextGroup, color, nextAcc);
 }
 
@@ -214,11 +214,15 @@ export function isKingInCheck(board, color, kingPos) {
   const isCheckOnDiagonal = DIAGONAL_OFFSETS
     .map(offset => getPosGroup(kingPos, offset))
     .map(group => group
-      .map(pos => getOccupiedState(board, pos, color))
+      .map((pos, step) => ({
+        step,
+        ...getOccupiedState(board, pos, color),
+      }))
       .find(state => state.isOccupied === true)
     ).some(state =>
       !!state && state.isOpponent &&
-        [oppositeBishop, oppositeQueen].includes(state.piece));
+        ([oppositeBishop, oppositeQueen].includes(state.piece) ||
+          (state.step === 1 && state.piece === oppositeKing)));
 
   if (isCheckOnDiagonal) return true;
 
