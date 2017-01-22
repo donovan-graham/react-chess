@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 
+import { COLOR_WHITE } from '../utils/constants';
 import Square from '../square';
 import './style.css';
 
@@ -15,11 +16,13 @@ Row.propTypes = {
   y: PropTypes.number.isRequired,
 };
 
-const ChessBoard = () => {
+const Board = ({ view }) => {
+  const style = (view === COLOR_WHITE) ? 'chess-board white-view' : 'chess-board black-view';
+
   const rows = ys.map(y => <Row key={y} y={y} />);
   return (
     <div>
-      <table cellPadding={0} cellSpacing={1} className="chess-board">
+      <table className={style} cellPadding={0} cellSpacing={1}>
         <tbody>
           {rows}
         </tbody>
@@ -28,5 +31,9 @@ const ChessBoard = () => {
   );
 };
 
+Board.propTypes = {
+  view: PropTypes.string.isRequired,
+};
+
 export { Row };
-export default ChessBoard;
+export default Board;

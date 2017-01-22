@@ -1,14 +1,10 @@
 import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
-import {
-  COLOR_TO_PIECES_MAP,
-} from '../utils/constants';
-import {
-  squareColor,
-} from './utils';
-
+import { COLOR_TO_PIECES_MAP } from '../utils/constants';
 import Piece from '../piece';
+import { squareColor } from './utils';
+
 
 
 const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSelect, onMove }) => {

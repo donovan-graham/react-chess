@@ -26,7 +26,7 @@ import {
 
 const startingBoard = getBoardStateFromFEN(FEN_START);
 
-export const initalState = {
+export const initialState = {
   pieces: startingBoard,
   history: [FEN_START,],
   activeColor: COLOR_WHITE,
@@ -35,11 +35,11 @@ export const initalState = {
   enPassantPos: null,
 };
 
-function reducer(state = initalState, action) {
+function reducer(state = initialState, action) {
   switch (action.type) {
     case NEXT_FEN_BOARD:
       return {
-        ...initalState,
+        ...initialState,
         pieces: getBoardStateFromFEN(action.fen),
         history: [...state.history, action.fen],
         activeColor: getActiveColorFromFEN(action.fen),

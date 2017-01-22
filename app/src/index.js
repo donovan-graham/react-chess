@@ -8,11 +8,14 @@ import App from './App';
 import './index.css';
 
 import { reducer as chessBoardReducer } from './chess-board';
+import { reducer as controlsReducer } from './controls';
 
 const reducers = {
+  form: formReducer,
   chessBoard: chessBoardReducer,
-  form: formReducer
-}
+  controls: controlsReducer,
+};
+
 const reducer = combineReducers(reducers);
 const store = createStore(reducer);
 

@@ -2,7 +2,27 @@ table.chess-board {
   border: 1px solid #dddddd;
   cellspacing: 0px;
   margin: 20px;
+  transition: transform 600ms linear;
+  will-change: transform;
 }
+
+table.chess-board.white-view {
+  transform: rotate(0deg);
+}
+
+table.chess-board.black-view {
+  transform: rotate(180deg);
+}
+
+table.chess-board.white-view td svg {
+  transform: rotate(0deg);
+}
+
+table.chess-board.black-view td svg {
+  transform: rotate(-180deg);
+}
+
+
 
 table.chess-board td {
   cursor: pointer;
@@ -13,37 +33,17 @@ table.chess-board td {
   text-align: center;
   line-height: 67px;
   box-sizing: border-box;
+  box-shadow: none;
 }
-
-/*
-https://coolors.co/6aacba-9ac8d1-c9dee2-708089-8fa0aa
-
-#6AACBA // MOONSTONE BLUE
-#9AC8D1 // PALE CERULEAN
-#C9DEE2 // COLUMBIA BLUE
-#708089 // SLATE GRAY
-#8FA0AA // CADET GREY
-
-https://coolors.co/cee5f2-accbe1-7c98b3-637081-536b78
-#CEE5F2 // AZUREISH WHITE
-#ACCBE1 // LIGHT STEEL BLUE
-#7C98B3 // WELDON BLUE
-#637081 // AUROMETALSAURUS
-#536B78 // PAYNE'S GREY
-
-
-https://coolors.co/6aacba-9ac8d1-c9dee2-a4aeb3-a3b1b9
-#A4AEB3 // SILVER CHALICE
-*/
 
 table.chess-board td.black {
   background-color: #dddddd;
-  transition: background-color 125ms ease;
+  transition: background-color 125ms linear;
 }
 
 table.chess-board td.white {
   background-color: #ffffff;
-  transition: background-color 125ms ease;
+  transition: background-color 125ms linear;
 }
 
 
@@ -64,6 +64,8 @@ table.chess-board td.white.is-move {
 table.chess-board td svg {
   display: block;
   margin: 11px; /* 67 - 45 / 2  = 10 */
+  transition: transform 600ms linear;
+  will-change: transform;
 }
 
 
