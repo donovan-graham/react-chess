@@ -2,12 +2,13 @@ import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
 import {
-  PIECE_TO_CSS_CLASS_NAME_MAP,
   COLOR_TO_PIECES_MAP,
 } from '../utils/constants';
 import {
   squareColor,
 } from './utils';
+
+import Piece from '../piece';
 
 
 const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSelect, onMove }) => {
@@ -15,7 +16,6 @@ const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSele
 
   const piece = pieces[pos];
   const hasPiece = !!piece;
-  const fullName = (hasPiece && PIECE_TO_CSS_CLASS_NAME_MAP[piece]) || '';
 
   const canSelect = hasPiece && COLOR_TO_PIECES_MAP[activeColor].indexOf(piece) !== -1;
 
@@ -41,7 +41,7 @@ const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSele
 
   return (
     <td data-square={pos} className={styles} onClick={() => onClick()}>
-      <div className={fullName}></div>
+      { hasPiece && <Piece piece={piece} /> }
     </td>
   );
 };
@@ -53,7 +53,7 @@ Square.propTypes = {
   activeColor: PropTypes.string.isRequired,
   activeSquare: PropTypes.number,
   availableMoves: PropTypes.object.isRequired,
-  
+
   onSelect: PropTypes.func.isRequired,
   onMove: PropTypes.func.isRequired,
 };

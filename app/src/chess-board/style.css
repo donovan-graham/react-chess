@@ -6,11 +6,12 @@ table.chess-board {
 
 table.chess-board td {
   cursor: pointer;
-  height: 60px;
-  width: 60px;
-  min-width: 60px;
-  font-size: 32px;
+  height: 67px;
+  width: 67px;
+  min-width: 67px;
+  font-size: 45px;
   text-align: center;
+  line-height: 67px;
   box-sizing: border-box;
 }
 
@@ -37,37 +38,33 @@ https://coolors.co/6aacba-9ac8d1-c9dee2-a4aeb3-a3b1b9
 
 table.chess-board td.black {
   background-color: #dddddd;
-  transition: background-color 120ms ease;
+  transition: background-color 125ms ease;
 }
 
 table.chess-board td.white {
   background-color: #ffffff;
-  transition: background-color 120ms ease;
+  transition: background-color 125ms ease;
 }
 
 
-table.chess-board td.black.can-select:hover {
-  background-color: #D1D6E4;
+table.chess-board td.black.is-active, table.chess-board td.black.can-select:hover {
+  background-color: #DADEF6;
 }
-table.chess-board td.white.can-select:hover {
-  background-color: #EEF0FA;
+table.chess-board td.white.is-active, table.chess-board td.white.can-select:hover{
+  background-color: #EFF1FD;
 }
-
-table.chess-board td.black.is-active {
-  background-color: #D1D6E4;
-}
-table.chess-board td.white.is-active {
-  background-color: #EEF0FA;
-}
-
 
 table.chess-board td.black.is-move {
-  background-color: #B7D8E5;
+  background-color: #CDE4ED;
 }
 table.chess-board td.white.is-move {
-  background-color: #D9EBF2;
+  background-color: #E4F1F6;
 }
 
+table.chess-board td svg {
+  display: block;
+  margin: 11px; /* 67 - 45 / 2  = 10 */
+}
 
 
 
