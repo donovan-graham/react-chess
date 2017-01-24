@@ -6,6 +6,7 @@ import { changeView } from './actions';
 const mapStateToProps = (state) => {
   return {
     activeColor: state.chessBoard.activeColor,
+    isCheckMate: state.chessBoard.isCheckMate,
   }
 };
 

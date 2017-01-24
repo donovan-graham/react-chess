@@ -16,11 +16,9 @@ const mapDispatchToProps = (dispatch, { pos }) => {
   return {
     onSelect: () => {
       const action = selectSquare(pos);
-      console.log("dispatch:", action);
       dispatch(action);
     },
     onMove: (moveAction) => {
-      console.log("dispatch:", moveAction);
       dispatch(moveAction);
     },
   };

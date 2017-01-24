@@ -100,9 +100,14 @@ export function isValidPos(pos) {
   return (0 <= x && x <=7 && 0 <= y && y <= 7);
 }
 
+
+export function checkPieceColor(piece, color) {
+  return COLOR_TO_PIECES_MAP[color].indexOf(piece) !== -1;
+}
+
 export function isOpponentsPiece(piece, color) {
   const oppositeColor = getOppositeColor(color);
-  return COLOR_TO_PIECES_MAP[oppositeColor].indexOf(piece) !== -1;
+  return checkPieceColor(piece, oppositeColor);
 }
 
 
@@ -465,8 +470,8 @@ export function pawnMoves({ board, fromPos, color, enPassantPos }) {
 }
 
 
-export function getMoves({ board, fromPos, enPassantPos }) {
-  const piece = getPieceAtPos(board, fromPos);
+export function getMoves({ board, piece, fromPos, enPassantPos }) {
+  piece = piece || getPieceAtPos(board, fromPos);
 
   switch(piece) {
     case PIECE_WHITE_KING:
@@ -498,6 +503,27 @@ export function getMoves({ board, fromPos, enPassantPos }) {
       return [];
   }
 }
+
+export function getAllMoves({ board, color }) {
+  const moves = Object
+    .keys(board)
+    .map(pos => {
+      const fromPos = parseInt(pos, 10);
+      return { fromPos, piece: getPieceAtPos(board, fromPos) };
+    })
+    .filter(o => !!o.piece && checkPieceColor(o.piece, color))
+    .map(o => {
+      const nextMoves = getMoves({ board, enPassantPos: null, ...o });
+      if (Object.keys(nextMoves).length === 0) {
+        return null;
+      }
+      return { [o.fromPos]: nextMoves };
+    })
+    .filter(o => !!o);
+
+  return Object.assign({}, ...moves);
+};
+
 
 
 // export const PIECE_TO_MOVES_MAP = {
