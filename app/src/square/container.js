@@ -5,10 +5,11 @@ import Component from './component';
 
 const mapStateToProps = (state) => {
   return {
-    pieces: state.chessBoard.pieces,
+    board: state.chessBoard.board,
     activeColor: state.chessBoard.activeColor,
-    activeSquare: state.chessBoard.activeSquare,
+    activePos: state.chessBoard.activeSquare,
     availableMoves: state.chessBoard.availableMoves,
+    moves: state.chessBoard.moves,
   };
 };
 

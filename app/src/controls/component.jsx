@@ -1,10 +1,29 @@
 import React, { PropTypes } from 'react';
 
+export function getGameStateMessage(isEndOfGame, isCheck, activeColor) {
+  if (isEndOfGame && isCheck) {
+    return `Game has ended - ${activeColor} is checkmated`;
+  }
+  if (isEndOfGame && !isCheck) {
+    return 'Game has ended - stalemate';
+  }
+  if (!isEndOfGame && isCheck) {
+    return `${activeColor}'s turn to play and is in check`;
+  }
+  return  `${activeColor}'s turn to play`;
+}
 
-const Controls = ({ activeColor, isCheckMate, handleToggle }) => {
+export function hasGameEnded(moves) {
+  return Object.keys(moves).length === 0;
+}
+
+const Controls = ({ activeColor, moves, isCheck, handleToggle }) => {
+  const isEndOfGame = hasGameEnded(moves);
+  const message = getGameStateMessage(isEndOfGame, isCheck, activeColor);
+
   return (
     <div className="game-controls">
-      <div>Player's turn: {activeColor} {isCheckMate && '<== checkmate'}</div>
+      <div>{message}</div>
       <button onClick={handleToggle}>Swap view</button>
     </div>
   );
@@ -12,7 +31,8 @@ const Controls = ({ activeColor, isCheckMate, handleToggle }) => {
 
 Controls.propTypes = {
   activeColor: PropTypes.string.isRequired,
-  isCheckMate: PropTypes.bool.isRequired,
+  isCheck: PropTypes.bool.isRequired,
+  moves: PropTypes.object.isRequired,
 
   handleToggle: PropTypes.func.isRequired,
 }

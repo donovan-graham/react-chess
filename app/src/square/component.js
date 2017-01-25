@@ -1,22 +1,23 @@
 import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
-import { COLOR_TO_PIECES_MAP } from '../utils/constants';
+// import { COLOR_TO_PIECES_MAP } from '../utils/constants';
 import Piece from '../piece';
 import { squareColor } from './utils';
 
 
 
-const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSelect, onMove }) => {
-  const color = squareColor(pos);
+const Square = ({ pos, board, activeColor, activePos, moves, availableMoves, onSelect, onMove }) => {
 
-  const piece = pieces[pos];
+  const color = squareColor(pos);
+  const isActive = pos === activePos;
+
+  const piece = board[pos];
   const hasPiece = !!piece;
 
-  const canSelect = hasPiece && COLOR_TO_PIECES_MAP[activeColor].indexOf(piece) !== -1;
+  const canSelect = hasPiece && !!moves[pos];
 
-  const isActive = pos === activeSquare;
-  const moveAction = availableMoves[pos];
+  const moveAction = (moves[activePos] && moves[activePos][pos]) || null;
   const isMove = !!moveAction;
 
   const onClick = () => {
@@ -45,9 +46,10 @@ const Square = ({ pos, pieces, activeColor, activeSquare, availableMoves, onSele
 Square.propTypes = {
   pos: PropTypes.number.isRequired,
 
-  pieces: PropTypes.object.isRequired,
+  board: PropTypes.object.isRequired,
   activeColor: PropTypes.string.isRequired,
-  activeSquare: PropTypes.number,
+  activePos: PropTypes.number,
+  moves: PropTypes.object.isRequired,
   availableMoves: PropTypes.object.isRequired,
 
   onSelect: PropTypes.func.isRequired,

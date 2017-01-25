@@ -504,7 +504,7 @@ export function getMoves({ board, piece, fromPos, enPassantPos }) {
   }
 }
 
-export function getAllMoves({ board, color }) {
+export function getAllMoves({ board, color, enPassantPos }) {
   const moves = Object
     .keys(board)
     .map(pos => {
@@ -513,7 +513,7 @@ export function getAllMoves({ board, color }) {
     })
     .filter(o => !!o.piece && checkPieceColor(o.piece, color))
     .map(o => {
-      const nextMoves = getMoves({ board, enPassantPos: null, ...o });
+      const nextMoves = getMoves({ board, enPassantPos, ...o });
       if (Object.keys(nextMoves).length === 0) {
         return null;
       }
